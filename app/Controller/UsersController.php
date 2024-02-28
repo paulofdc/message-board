@@ -51,19 +51,16 @@ class UsersController extends AppController {
 	 */
 	public function add() {
 		if ($this->request->is('post')) {
-			$this->User->create();
 			$filename = $this->uploadImage();
-			debug($filename);
-			if($filename !== false) {
-				$this->request->data['User']['photo'] = $filename;
-				if ($this->User->save($this->request->data)) {
-					if ($this->Auth->login()) {
-						$this->updateUserLoginTime(AuthComponent::user('id'));
-						return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
-					}
-				}
-			} else {
-				$this->Flash->error(__('An error occured during uploading photo. Please try again.'));
+			switch($filename) {
+				case 'E-1000':
+					$this->Flash->error(__('Only gif, jpg, jpeg, and png are allowed.'));
+					break;
+				case false:
+					$this->Flash->error(__('An error occured during uploading photo. Please try again.'));
+					break;
+				default:
+					$this->saveUser($filename);
 			}
 		}
 	}
@@ -118,7 +115,6 @@ class UsersController extends AppController {
 	public function login() {
 		if($this->request->is('post')) {
 			if($this->Auth->login()) {
-				debug(AuthComponent::user('id'));
 				$this->updateUserLoginTime(AuthComponent::user('id'));
 				return $this->redirect($this->Auth->redirectUrl());
 			} else {
@@ -149,11 +145,21 @@ class UsersController extends AppController {
 		$this->User->saveField('last_login', date("Y-m-d H:i:s"));
 	}
 
+	/**
+	 * uploadImage
+	 */
 	public function uploadImage() {
 		try {
 			if (!empty($this->request->data['User']['photo']['name'])) {
 				$photo = $this->request->data['User']['photo'];
 		
+				$allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
+				$fileExtension = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
+				
+				if (!in_array($fileExtension, $allowedExtensions)) {
+					return "E-1000";
+				}
+
 				$uploadDir = WWW_ROOT . 'uploads';
 		
 				if (!is_dir($uploadDir)) {
@@ -165,19 +171,29 @@ class UsersController extends AppController {
 				if (move_uploaded_file($photo['tmp_name'], $uploadDir . DS . $filename)) {
 					return $filename;
 				} else {
-					debug('hu?');
-
 					// $this->Session->setFlash('File upload failed. Please try again.');
 					return false;
 				}
 			} else {
-				debug('ha?');
-
 				// $this->Session->setFlash('Please choose a file to upload.');
 				return false;
 			}
 		} catch (Exception $e) {
 			return false;
+		}
+	}
+
+	/**
+	 * saveUser
+	 */
+	public function saveUser($filename) {
+		$this->User->create();
+		$this->request->data['User']['photo'] = $filename;
+		if ($this->User->save($this->request->data)) {
+			if ($this->Auth->login()) {
+				$this->updateUserLoginTime(AuthComponent::user('id'));
+				return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
+			}
 		}
 	}
 }
