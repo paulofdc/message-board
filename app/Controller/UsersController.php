@@ -52,11 +52,18 @@ class UsersController extends AppController {
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->User->create();
-			if ($this->User->save($this->request->data)) {
-                if ($this->Auth->login()) {
-					$this->updateUserLoginTime(AuthComponent::user('id'));
-                    return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
-                }
+			$filename = $this->uploadImage();
+			debug($filename);
+			if($filename !== false) {
+				$this->request->data['User']['photo'] = $filename;
+				if ($this->User->save($this->request->data)) {
+					if ($this->Auth->login()) {
+						$this->updateUserLoginTime(AuthComponent::user('id'));
+						return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
+					}
+				}
+			} else {
+				$this->Flash->error(__('An error occured during uploading photo. Please try again.'));
 			}
 		}
 	}
@@ -125,9 +132,12 @@ class UsersController extends AppController {
 	 */
 	public function logout() {
 		$this->Auth->logout();
-		return $this->redirect('/');
+		return $this->redirect('/users/login');
 	}
 
+	/**
+	 * updateUserLoginTime
+	 */
 	public function updateUserLoginTime($userId) {
 		$user = $this->User->findById($userId);
 
@@ -137,5 +147,37 @@ class UsersController extends AppController {
 
 		$this->User->id = $userId;
 		$this->User->saveField('last_login', date("Y-m-d H:i:s"));
+	}
+
+	public function uploadImage() {
+		try {
+			if (!empty($this->request->data['User']['photo']['name'])) {
+				$photo = $this->request->data['User']['photo'];
+		
+				$uploadDir = WWW_ROOT . 'uploads';
+		
+				if (!is_dir($uploadDir)) {
+					mkdir($uploadDir);
+				}
+		
+				$filename = uniqid() . '_' . $photo['name'];
+		
+				if (move_uploaded_file($photo['tmp_name'], $uploadDir . DS . $filename)) {
+					return $filename;
+				} else {
+					debug('hu?');
+
+					// $this->Session->setFlash('File upload failed. Please try again.');
+					return false;
+				}
+			} else {
+				debug('ha?');
+
+				// $this->Session->setFlash('Please choose a file to upload.');
+				return false;
+			}
+		} catch (Exception $e) {
+			return false;
+		}
 	}
 }

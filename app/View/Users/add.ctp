@@ -27,6 +27,7 @@
 		</div>
 		<?php
 			echo $this->Form->create('User', [
+				'type' => 'file',
 				'inputDefaults' => [
 					'error' => false
 				]
