@@ -54,6 +54,7 @@ class UsersController extends AppController {
 			$this->User->create();
 			if ($this->User->save($this->request->data)) {
                 if ($this->Auth->login()) {
+					$this->updateUserLoginTime(AuthComponent::user('id'));
                     return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
                 }
 			}
@@ -109,9 +110,9 @@ class UsersController extends AppController {
 	 */
 	public function login() {
 		if($this->request->is('post')) {
-			$password = $this->request->data['User']['password'];
-			debug($password);
 			if($this->Auth->login()) {
+				debug(AuthComponent::user('id'));
+				$this->updateUserLoginTime(AuthComponent::user('id'));
 				return $this->redirect($this->Auth->redirectUrl());
 			} else {
 				$this->Flash->error(__('Invalid email or password'));
@@ -125,5 +126,16 @@ class UsersController extends AppController {
 	public function logout() {
 		$this->Auth->logout();
 		return $this->redirect('/');
+	}
+
+	public function updateUserLoginTime($userId) {
+		$user = $this->User->findById($userId);
+
+		if (!$user) {
+			throw new NotFoundException(__('User not found'));
+		}
+
+		$this->User->id = $userId;
+		$this->User->saveField('last_login', date("Y-m-d H:i:s"));
 	}
 }
