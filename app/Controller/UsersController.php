@@ -54,7 +54,7 @@ class UsersController extends AppController {
 			$this->User->create();
 			if ($this->User->save($this->request->data)) {
                 if ($this->Auth->login()) {
-                    return $this->redirect(['action' => 'greetings']);
+                    return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
                 }
 			}
 		}
@@ -125,9 +125,5 @@ class UsersController extends AppController {
 	public function logout() {
 		$this->Auth->logout();
 		return $this->redirect('/');
-	}
-
-	public function greetings() {
-
 	}
 }
