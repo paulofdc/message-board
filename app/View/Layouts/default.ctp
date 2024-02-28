@@ -25,7 +25,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 		<?php echo $cakeDescription ?>:
 		<?php echo $this->fetch('title'); ?>
 	</title>
-	<?php echo $this->Html->script('jquery'); ?>
+	<?php echo $this->Html->script('jquery-3-7-1'); ?>
 	<?php
 		echo $this->Html->meta('icon');
 
