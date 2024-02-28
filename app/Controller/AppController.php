@@ -31,4 +31,22 @@ App::uses('Controller', 'Controller');
  * @link		https://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
+
+    public $components = [
+        'Session',
+        'Flash',
+        'Auth' => [
+			'authenticate' => [
+				'Form' => [
+					'fields' => ['username' => 'email']
+				]
+            ],
+            'authError' => "You can't access that page",
+            'authorize' => ['Controller']
+        ], 
+    ];
+
+    public function isAuthorized() {
+        return true;
+    }
 }

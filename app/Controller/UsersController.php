@@ -15,6 +15,10 @@ class UsersController extends AppController {
 	 */
 	public $components = array('Paginator');
 
+	public function beforeFilter() {
+		$this->Auth->allow(['add']);
+	}
+
 	/**
 	 * index method
 	 *
@@ -49,10 +53,9 @@ class UsersController extends AppController {
 		if ($this->request->is('post')) {
 			$this->User->create();
 			if ($this->User->save($this->request->data)) {
-				$this->Flash->success(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Flash->error(__('The user could not be saved. Please, try again.'));
+                if ($this->Auth->login()) {
+                    return $this->redirect(['action' => 'greetings']);
+                }
 			}
 		}
 	}
@@ -101,7 +104,30 @@ class UsersController extends AppController {
 		return $this->redirect(array('action' => 'index'));
 	}
 
+	/**
+	 * Login
+	 */
 	public function login() {
-		
+		if($this->request->is('post')) {
+			$password = $this->request->data['User']['password'];
+			debug($password);
+			if($this->Auth->login()) {
+				return $this->redirect($this->Auth->redirectUrl());
+			} else {
+				$this->Flash->error(__('Invalid email or password'));
+			}
+		}
+	}
+
+	/**
+	 * Logout
+	 */
+	public function logout() {
+		$this->Auth->logout();
+		return $this->redirect('/');
+	}
+
+	public function greetings() {
+
 	}
 }

@@ -15,31 +15,28 @@ class User extends AppModel {
 		'name' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
+			'Minimum Length' => [
+				'rule' => ['minLength', '5'],
+				'message' => 'Please enter at least 5 characters.',
+			],
+			'Maximum Length' => [
+				'rule' => ['maxLength', '20'],
+				'message' => 'Please enter not more than 20 characters.',
+			]
 		),
 		'email' => array(
 			'email' => array(
 				'rule' => array('email'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
+            'unique' => array(
+                'rule' => 'isUnique',
+                'message' => 'This email address is already in use'
+            ),
 		),
 		'password' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 			'Match passwords' => [
 				'rule' => ['matchPasswords'],
@@ -50,30 +47,16 @@ class User extends AppModel {
 			'notBlank' => array(
 				'rule' => array('notBlank'),
 				'message' => 'Please confirm your password',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			)
 		),
 		'gender' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
 		'photo' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
-				//'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
 		'birthdate' => array(
@@ -89,21 +72,14 @@ class User extends AppModel {
 		'last_login' => array(
 			'datetime' => array(
 				'rule' => array('datetime'),
-				//'message' => 'Your custom message here',
-				//'allowEmpty' => false,
 				'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
 		'other_details' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				//'message' => 'Your custom message here',
 				'allowEmpty' => true,
 				'required' => false,
-				//'last' => false, // Stop validation after this rule
-				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
 	);
@@ -119,5 +95,14 @@ class User extends AppModel {
 		$this->invalidate('confirm_password', 'Your passwords do not match');
 
 		return false;
+	}
+
+	/**
+	 * beforeSave
+	 */
+	public function beforeSave($options = array()) {
+		if(isset($this->data["User"]['password'])) {
+			$this->data["User"]["password"] = Security::hash($this->data["User"]["password"], null, true);
+		}
 	}
 }

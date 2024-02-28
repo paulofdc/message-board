@@ -5,3 +5,5 @@
     <?php echo $this->Form->input('password') ?>
     <?php echo $this->Form->end('Login') ?>
 </div>
+
+<?= $this->Element('actions') ?>
