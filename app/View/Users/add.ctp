@@ -47,11 +47,7 @@
 				]
 			]);
 		?>
-		<?= $this->Html->image('https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp', [
-			'id' => 'imagePreview',
-			'style' => 'max-width: 200px; max-height: 200px;',
-			'alt' => 'Your Image'
-		]); ?>
+		<?= $this->Element('preview_photo') ?>
 		<?php
 			echo $this->Form->input('photo', [
 				'id' => 'profile-image-upload',
@@ -67,18 +63,4 @@
 </div>
 
 <?= $this->Element('actions') ?>
-
-<script>
-	$(document).ready(function() {
-		$('#profile-image-upload').change(function() {
-			var file = this.files[0];
-			if (file) {
-				var reader = new FileReader();
-				reader.onload = function(e) {
-					$('#imagePreview').attr('src', e.target.result).show();
-				}
-				reader.readAsDataURL(file);
-			}
-		});
-	});
-</script>
+<?= $this->Element('preview_photo_script') ?>

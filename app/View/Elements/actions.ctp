@@ -1,11 +1,16 @@
+<?php $currentUser = AuthComponent::user(); ?>
 <div class="actions">
-	<?php if(AuthComponent::user()) : ?>
+	<?php if($currentUser) : ?>
 		<h3><?php echo __('Hi %s!', h(AuthComponent::user('name'))); ?></h3>
+
+		<ul>
+			<li><?php echo $this->Html->link(__('My account'), array('controller' => "users", 'action' => 'edit', AuthComponent::user('id'))); ?></li>
+		</ul>
 	<?php endif; ?>
 	<ul>
 		<li><?php echo $this->Html->link(__('Home'), array('controller' => "home", 'action' => 'index')); ?></li>
 	</ul>
-	<?php if(!AuthComponent::user()) : ?>
+	<?php if(!$currentUser) : ?>
 	<ul>
 		<li><?php echo $this->Html->link(__('Login'), array('controller' => "users", 'action' => 'login')); ?></li>
 	</ul>
@@ -16,7 +21,7 @@
 	<ul>
 		<li><?php echo $this->Html->link(__('Users'), array('controller' => "users", 'action' => 'index')); ?></li>
 	</ul>
-	<?php if(AuthComponent::user()) : ?>
+	<?php if($currentUser) : ?>
 		<ul>
 			<li>
 				<?= 

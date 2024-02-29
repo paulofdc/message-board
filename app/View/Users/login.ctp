@@ -1,4 +1,4 @@
-<div class="users index">
+<div class="users form">
 	<h2><?php echo __('Login'); ?></h2>
     <?php echo $this->Form->create('User') ?>
     <?php echo $this->Form->input('email') ?>
