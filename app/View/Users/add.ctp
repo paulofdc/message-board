@@ -47,7 +47,11 @@
 				]
 			]);
 		?>
-		<img id="imagePreview" src="#" style="display: none; max-width: 200px; max-height: 200px;" alt="Your Image" />
+		<?= $this->Html->image('https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp', [
+			'id' => 'imagePreview',
+			'style' => 'max-width: 200px; max-height: 200px;',
+			'alt' => 'Your Image'
+		]); ?>
 		<?php
 			echo $this->Form->input('photo', [
 				'id' => 'profile-image-upload',
