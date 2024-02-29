@@ -53,12 +53,14 @@ class UsersController extends AppController {
 		if ($this->request->is('post')) {
 			$filename = $this->uploadImage();
 			switch($filename) {
-				case 'E-1000':
-					$this->Flash->error(__('Only gif, jpg, jpeg, and png are allowed.'));
-					break;
 				case false:
 					$this->Flash->error(__('An error occured during uploading photo. Please try again.'));
 					break;
+				case 'E-1000':
+					$this->Flash->error(__('Only gif, jpg, jpeg, and png are allowed.'));
+					break;
+				case 'E-EMPTY':
+					$filename = NULL;
 				default:
 					$this->saveUser($filename);
 			}
@@ -76,6 +78,11 @@ class UsersController extends AppController {
 		if (!$this->User->exists($id)) {
 			throw new NotFoundException(__('Invalid user'));
 		}
+
+		if($this->Auth->user('id') != $id) {
+			return $this->redirect(array('action' => '/'));
+		}
+
 		if ($this->request->is(array('post', 'put'))) {
 			if ($this->User->save($this->request->data)) {
 				$this->Flash->success(__('The user has been saved.'));
@@ -132,7 +139,7 @@ class UsersController extends AppController {
 	}
 
 	/**
-	 * updateUserLoginTime
+	 * Update User 'login_time'
 	 */
 	public function updateUserLoginTime($userId) {
 		$user = $this->User->findById($userId);
@@ -146,7 +153,7 @@ class UsersController extends AppController {
 	}
 
 	/**
-	 * uploadImage
+	 * Upload Image
 	 */
 	public function uploadImage() {
 		try {
@@ -171,12 +178,10 @@ class UsersController extends AppController {
 				if (move_uploaded_file($photo['tmp_name'], $uploadDir . DS . $filename)) {
 					return $filename;
 				} else {
-					// $this->Session->setFlash('File upload failed. Please try again.');
 					return false;
 				}
 			} else {
-				// $this->Session->setFlash('Please choose a file to upload.');
-				return false;
+				return "E-EMPTY";
 			}
 		} catch (Exception $e) {
 			return false;
@@ -184,7 +189,7 @@ class UsersController extends AppController {
 	}
 
 	/**
-	 * saveUser
+	 * Save User
 	 */
 	public function saveUser($filename) {
 		$this->User->create();

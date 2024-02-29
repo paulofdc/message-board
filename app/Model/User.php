@@ -57,6 +57,8 @@ class User extends AppModel {
 		'photo' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
+				'required' => false,
+				'allowEmpty' => true,
 			),
 		),
 		'birthdate' => array(
@@ -73,6 +75,7 @@ class User extends AppModel {
 			'datetime' => array(
 				'rule' => array('datetime'),
 				'required' => false,
+				'allowEmpty' => true,
 			),
 		),
 		'other_details' => array(
