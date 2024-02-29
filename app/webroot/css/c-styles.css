@@ -1,0 +1,38 @@
+.error-list {
+    padding: 0;
+    margin: 0;
+}
+.error-list li {
+    color: red;
+    margin-bottom: 5px;
+}
+
+.horizontal-alignment {
+    display: flex;
+    align-items: center;
+}
+
+.horizontal-alignment > * {
+    margin-right: 30px;
+}
+
+.mt-10-i {
+    margin-top: 10px !important;
+}
+
+.mt-20-i {
+    margin-top: 20px !important;
+}
+
+.max-w-profile {
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+#upload-btn {
+    padding: 5px !important;
+}
+
+#birthdate {
+    width: 140px;
+}
