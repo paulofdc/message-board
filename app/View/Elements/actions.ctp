@@ -4,7 +4,7 @@
 		<h3><?php echo __('Hi %s!', h(AuthComponent::user('name'))); ?></h3>
 
 		<ul>
-			<li><?php echo $this->Html->link(__('My account'), array('controller' => "users", 'action' => 'edit', AuthComponent::user('id'))); ?></li>
+			<li><?php echo $this->Html->link(__('My account'), array('controller' => "users", 'action' => 'profile', AuthComponent::user('id'))); ?></li>
 		</ul>
 	<?php endif; ?>
 	<ul>

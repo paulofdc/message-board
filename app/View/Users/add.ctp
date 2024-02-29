@@ -1,37 +1,26 @@
-<style>
-	.error-list {
-		padding: 0;
-		margin: 0;
-	}
-	.error-list li {
-		color: red;
-		margin-bottom: 5px;
-	}
-</style>
-
 <div class="users form">
 	<fieldset>
 		<legend><?php echo __('Register'); ?></legend>
-		<div class="custom-error-container">
-			<?php if (!empty($this->validationErrors['User'])): ?>
-				<div class="validation-errors">
-					<ul class="error-list">
-						<?php foreach ($this->validationErrors['User'] as $field => $errors): ?>
-							<?php foreach ($errors as $error): ?>
-								<li><?= $error ?></li>
-							<?php endforeach; ?>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-			<?php endif; ?>
-		</div>
-		<?php
+		<?= $this->Element('error_messages') ?>
+		<?php 			
 			echo $this->Form->create('User', [
 				'type' => 'file',
 				'inputDefaults' => [
 					'error' => false
 				]
 			]); 
+		?>
+		<div class="horizontal-alignment">
+			<?= $this->Element('preview_photo') ?>
+			<button type="button" id="upload-btn"><?= __('Upload Picture'); ?></button>
+			<?= $this->Form->input('photo', [
+				'label' => '',
+				'id' => 'profile-image-upload',
+				'type' => 'file',
+				'hidden' => true
+			]); ?>
+		</div>
+		<?php
 			echo $this->Form->input('name');
 			echo $this->Form->input('email');
 			echo $this->Form->input('password');
@@ -40,22 +29,24 @@
 				'required' => true
 			]);
 			echo $this->Form->input('gender', [
-				'type' => 'select',
+				'type' => 'radio',
+				'style' => 'margin-left: 20px',
 				'options' => [
 					'male' => 'Male',
 					'female' => 'Female'
-				]
+				],
+				'fieldset' => ['class' => 'horizontal-alignment']
 			]);
 		?>
-		<?= $this->Element('preview_photo') ?>
 		<?php
-			echo $this->Form->input('photo', [
-				'id' => 'profile-image-upload',
-				'type' => 'file'
+			echo $this->Form->input('birthdate', [
+				'type' => 'text',
+				'autocomplete' => 'off',
+				'readonly' => true,
+				'id' => 'birthdate',
 			]);
-			echo $this->Form->input('birthdate');
 			echo $this->Form->input('other_details', [
-				'required' => false
+				'type' => 'textarea'
 			]);
 		?>
 	</fieldset>
@@ -63,4 +54,7 @@
 </div>
 
 <?= $this->Element('actions') ?>
+
 <?= $this->Element('preview_photo_script') ?>
+<?= $this->Element('birthdate_calendar_script') ?>
+<?= $this->Element('custom-scripts') ?>

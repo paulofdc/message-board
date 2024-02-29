@@ -67,28 +67,35 @@ class UsersController extends AppController {
 		}
 	}
 
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
+	/**
+	 * edit method
+	 *
+	 * @throws NotFoundException
+	 * @param string $id
+	 * @return void
+	 */
 	public function edit($id = null) {
 		if (!$this->User->exists($id)) {
 			throw new NotFoundException(__('Invalid user'));
 		}
-
 		if($this->Auth->user('id') != $id) {
-			return $this->redirect(array('action' => '/'));
+			return $this->redirect(['controller' => 'home', 'action' => 'index']);
 		}
 
 		if ($this->request->is(array('post', 'put'))) {
-			if ($this->User->save($this->request->data)) {
-				$this->Flash->success(__('The user has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			} else {
-				$this->Flash->error(__('The user could not be saved. Please, try again.'));
+			$filename = $this->uploadImage();
+			debug($filename);
+			switch($filename) {
+				case false:
+					$this->Flash->error(__('An error occured during uploading photo. Please try again.'));
+					break;
+				case 'E-1000':
+					$this->Flash->error(__('Only gif, jpg, jpeg, and png are allowed.'));
+					break;
+				case 'E-EMPTY':
+					$filename = $this->Auth->user('photo');
+				default:
+					$this->saveUser($filename, true);
 			}
 		} else {
 			$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
@@ -122,10 +129,74 @@ class UsersController extends AppController {
 	public function login() {
 		if($this->request->is('post')) {
 			if($this->Auth->login()) {
-				$this->updateUserLoginTime(AuthComponent::user('id'));
+				$this->updateUserLoginTime($this->Auth->user('id'));
 				return $this->redirect($this->Auth->redirectUrl());
 			} else {
 				$this->Flash->error(__('Invalid email or password'));
+			}
+		}
+	}
+
+	/**
+	 * View Profile
+	 */
+	public function profile($id) {
+		$user = $this->User->findById($id);
+
+		if (!$user) {
+			throw new NotFoundException(__('User not found'));
+		}
+
+		$userData = $user['User'];
+		$userData['age'] = $this->birthdateToAgeConverter($userData['birthdate']);
+		$userData['birthdate'] = $this->dateToString($userData['birthdate']);
+		$userData['date_joined'] = $this->dateToString($userData['created'], true);
+		$userData['last_login'] = $this->dateToString($userData['last_login'], true);
+		$this->set('user', $userData);
+	}
+
+	/**
+	 * Change Password
+	 */
+	public function changePassword($id) {
+		if($id != $this->Auth->user('id')) {
+			$this->redirect('/');
+		}
+
+		if($this->request->is('post')) {
+			$this->User->set($this->request->data);
+			if ($this->User->validates()) {
+				$user = $this->User->findById($id);
+				if (!$user) {
+					throw new NotFoundException(__('User not found'));
+				}
+
+				$this->User->id = $id;
+				$this->User->saveField('password', $this->request->data['User']['password']);
+				return $this->redirect(['action' => 'profile', $id]);
+			}
+		}
+	}
+
+	/**
+	 * Change Email Address
+	 */
+	public function changeEmailAddress($id) {
+		if($id != $this->Auth->user('id')) {
+			$this->redirect('/');
+		}
+
+		if($this->request->is('post')) {
+			$this->User->set($this->request->data);
+			if ($this->User->validates()) {
+				$user = $this->User->findById($id);
+				if (!$user) {
+					throw new NotFoundException(__('User not found'));
+				}
+
+				$this->User->id = $id;
+				$this->User->saveField('email', $this->request->data['User']['new_email_address']);
+				return $this->redirect(['action' => 'profile', $id]);
 			}
 		}
 	}
@@ -191,14 +262,44 @@ class UsersController extends AppController {
 	/**
 	 * Save User
 	 */
-	public function saveUser($filename) {
+	public function saveUser($filename, $isEdit = false) {
 		$this->User->create();
 		$this->request->data['User']['photo'] = $filename;
+
 		if ($this->User->save($this->request->data)) {
 			if ($this->Auth->login()) {
-				$this->updateUserLoginTime(AuthComponent::user('id'));
+				$this->updateUserLoginTime($this->Auth->user('id'));
+
+				if($isEdit) {
+					$this->Session->write('Auth.User', $this->request->data['User']);
+					$this->Flash->success(__('The user has been saved.'));
+					return $this->redirect(['action' => 'profile', $this->Auth->user('id')]);
+				}
+
 				return $this->redirect(['controller' => 'home', 'action' => 'greetings']);
 			}
+		} else {
+			$this->Flash->error(__('The user could not be saved. Please, try again.'));
 		}
+	}
+
+	/**
+	 * Birthdate Converter
+	 */
+	public function birthdateToAgeConverter($birthdate) {
+		$birthdate = new DateTime($birthdate);
+		$currentDate = new DateTime();
+
+		$diff = $currentDate->diff($birthdate);
+		return $diff->y;
+	}
+
+	/**
+	 * Date to String
+	 */
+	public function dateToString($date, $isTimeIncluded = false) {
+		$date = new DateTime($date);
+		$pattern = ($isTimeIncluded) ? 'F j, Y ga' : 'F j, Y';
+		return $date->format($pattern);
 	}
 }
