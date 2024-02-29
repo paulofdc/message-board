@@ -1,7 +1,7 @@
 <div class="actions">
 	<?php if(AuthComponent::user()) : ?>
 		<h3><?php echo __('Hi %s!', h(AuthComponent::user('name'))); ?></h3>
-	<? endif; ?>
+	<?php endif; ?>
 	<ul>
 		<li><?php echo $this->Html->link(__('Home'), array('controller' => "home", 'action' => 'index')); ?></li>
 	</ul>
