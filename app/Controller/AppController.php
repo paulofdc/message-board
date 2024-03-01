@@ -49,4 +49,24 @@ class AppController extends Controller {
     public function isAuthorized() {
         return true;
     }
+
+	/**
+	 * Birthdate Converter
+	 */
+	public function birthdateToAgeConverter($birthdate) {
+		$birthdate = new DateTime($birthdate);
+		$currentDate = new DateTime();
+
+		$diff = $currentDate->diff($birthdate);
+		return $diff->y;
+	}
+
+	/**
+	 * Date to String
+	 */
+	public function dateToString($date, $isTimeIncluded = false) {
+		$date = new DateTime($date);
+		$pattern = ($isTimeIncluded) ? 'F j, Y ga' : 'F j, Y';
+		return $date->format($pattern);
+	}
 }

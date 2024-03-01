@@ -48,16 +48,18 @@ class MessagesController extends AppController {
 	public function add() {
 		if ($this->request->is('post')) {
 			$this->Message->create();
+			$threadId = $this->request->data['Message']['threadId'];
+			unset($this->request->data['Message']['threadId']);
+			$this->request->data['Message']['thread_id'] = $threadId;
+			$this->request->data['Message']['user_id'] = $this->Auth->user('id');
 			if ($this->Message->save($this->request->data)) {
-				$this->Flash->success(__('The message has been saved.'));
-				return $this->redirect(array('action' => 'index'));
+				$this->Flash->success(__('The message has been sent.'));
+				return $this->redirect(['controller' => 'threads','action' => 'view', $threadId]);
 			} else {
 				$this->Flash->error(__('The message could not be saved. Please, try again.'));
+				return $this->redirect(['controller' => 'threads','action' => 'view', $threadId]);
 			}
 		}
-		$threads = $this->Message->Thread->find('list');
-		$users = $this->Message->User->find('list');
-		$this->set(compact('threads', 'users'));
 	}
 
 /**

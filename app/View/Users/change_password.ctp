@@ -1,6 +1,10 @@
 <div class="users form">
     <h2><?= __('Change Password'); ?></h2>
-    <?= $this->Element('error_messages') ?>
+    <?= 
+        $this->Element('error_messages', [
+            'type' => 'User'
+        ])  
+    ?>
 	<div>
         <?php
             echo $this->Form->create('User', [

@@ -1,7 +1,11 @@
 <div class="users form">
 	<fieldset>
 		<legend><?php echo __('Register'); ?></legend>
-		<?= $this->Element('error_messages') ?>
+		<?= 
+			$this->Element('error_messages', [
+				'type' => 'User'
+			])  
+		?>
 		<?php 			
 			echo $this->Form->create('User', [
 				'type' => 'file',

@@ -1,6 +1,6 @@
 <script>
     $(document).ready(function() {
-        $('.select2-recepient').select2({
+        $('.select2-recipient').select2({
             width: 'resolve',
             theme: "classic"
         });

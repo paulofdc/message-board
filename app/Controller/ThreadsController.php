@@ -24,8 +24,26 @@ class ThreadsController extends AppController {
 	 * @return void
 	 */
 	public function index() {
-		$this->Thread->recursive = 0;
-		$this->set('threads', $this->Paginator->paginate());
+		$ownerId = $this->Auth->user('id');
+		$threads = $this->Thread->find('all', [
+			'contain' => [
+				'Message' => [
+					'order' => 'Message.created DESC',
+					'limit' => 1
+				],
+				'Owner',
+				'Receiver',
+			],
+			'conditions' => [
+				'OR' => [
+					'Thread.owner_id' => $ownerId,
+					'Thread.receiver_id' => $ownerId
+				]
+			],
+			'limit' => 10
+		]);
+
+		$this->set('threads', $threads);
 	}
 
 	/**
@@ -36,11 +54,30 @@ class ThreadsController extends AppController {
 	 * @return void
 	 */
 	public function view($id = null) {
+		$thread = $this->Thread->findById($id);
+		$toCheck = [$thread["Thread"]['owner_id'], $thread["Thread"]['receiver_id']];
+		if(!in_array($this->Auth->user('id'), $toCheck)) {
+			$this->redirect('/');
+		}
+
 		if (!$this->Thread->exists($id)) {
 			throw new NotFoundException(__('Invalid thread'));
 		}
-		$options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
-		$this->set('thread', $this->Thread->find('first', $options));
+
+		$messages = $this->Message->find('all', [
+			'order' => 'Message.created DESC',
+			'conditions' => [
+				'thread_id' => $id
+			]
+		]);
+
+		$participant = $thread["Owner"]['id'] == $this->Auth->user('id') ? 
+						$thread["Receiver"]['name'] : $thread["Owner"]['name'];
+		$this->set([
+			'participant' => $participant,
+			'threadId' => $id,
+			'messages' => $messages
+		]);
 	}
 
 	/**
@@ -81,7 +118,12 @@ class ThreadsController extends AppController {
 			}
 		}
 
-		$receivers = $this->Thread->Receiver->find('list');
+		$receivers = $this->Thread->Receiver->find('list', [
+			'conditions' => [
+				'Receiver.id !=' => $this->Auth->user('id')
+			]
+		]);
+
 		$this->set(compact('receivers'));
 	}
 

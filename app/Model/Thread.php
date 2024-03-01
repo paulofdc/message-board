@@ -9,6 +9,8 @@ App::uses('AppModel', 'Model');
  */
 class Thread extends AppModel {
 
+	public $actsAs = array('Containable');
+	
 	/**
 	 * Validation rules
 	 *

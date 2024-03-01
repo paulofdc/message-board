@@ -25,19 +25,20 @@ class Message extends AppModel {
 			),
 		),
 		'content' => array(
-			'notBlank' => array(
-				'rule' => array('notBlank')
+			'Message Content' => array(
+				'rule' => array('notBlank'),
+				'message' => 'Message is required'
 			),
 		),
 	);
 
 	// The Associations below have been created with all possible keys, those that are not needed can be removed
 
-/**
- * belongsTo associations
- *
- * @var array
- */
+	/**
+	 * belongsTo associations
+	 *
+	 * @var array
+	 */
 	public $belongsTo = array(
 		'Thread' => array(
 			'className' => 'Thread',
