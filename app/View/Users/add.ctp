@@ -49,8 +49,8 @@
 				'type' => 'textarea'
 			]);
 		?>
+		<?php echo $this->Form->end(__('Submit')); ?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit')); ?>
 </div>
 
 <?= $this->Element('actions') ?>

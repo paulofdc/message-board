@@ -3,8 +3,8 @@ App::uses('AppModel', 'Model');
 /**
  * Thread Model
  *
- * @property Owner $Owner
- * @property Receiver $Receiver
+ * @property User $Owner
+ * @property User $Receiver
  * @property Message $Message
  */
 class Thread extends AppModel {

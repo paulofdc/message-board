@@ -1,5 +1,10 @@
 <script>
     $(document).ready(function() {
+        $('.select2-recepient').select2({
+            width: 'resolve',
+            theme: "classic"
+        });
+
         $('#upload-btn').click(function() {
             $('#profile-image-upload').click();
         });

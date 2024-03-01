@@ -1,4 +1,3 @@
-
 <div class="users form">
     <h2><?= __('Change Email Address'); ?></h2>
     <?= $this->Element('error_messages') ?>

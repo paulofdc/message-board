@@ -16,6 +16,10 @@
     margin-right: 30px;
 }
 
+.c-container {
+    width: 100%;
+}
+
 .mt-10-i {
     margin-top: 10px !important;
 }
@@ -35,4 +39,13 @@
 
 #birthdate {
     width: 140px;
+}
+
+/* About select 2 modfications */
+.select2-recepient {
+    width: 100%;
+}
+
+.select2-results__option {
+    color: black; /* Change the text color of options */
 }
