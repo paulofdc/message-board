@@ -73,6 +73,7 @@ class ThreadsController extends AppController {
 					$this->Flash->success(__('The message has been created.'));
 					return $this->redirect(['action' => 'index']);
 				} else {
+					$this->Thread->delete($threadId);
 					$this->Flash->error(__('Failed to create message.'));
 				}
 			} else {
