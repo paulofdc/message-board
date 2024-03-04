@@ -70,6 +70,18 @@ html {
     border-radius: 4px;
 }
 
+.delete-message-btn {
+    text-decoration: none;
+    color: white;
+    font-size: 10px;
+    border: 1px solid #b74242;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #b74242;
+    border-radius: 4px;
+}
+
 .thread-link {
     text-decoration: none;
 }
@@ -81,6 +93,10 @@ html {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+}
+
+.delete-container {
+    display: none;
 }
 
 .c-left {

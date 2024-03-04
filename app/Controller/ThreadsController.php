@@ -55,6 +55,10 @@ class ThreadsController extends AppController {
 	 */
 	public function view($id = null) {
 		$thread = $this->Thread->findById($id);
+		if(!$thread) {
+			$this->redirect('/');
+		}
+
 		$toCheck = [$thread["Thread"]['owner_id'], $thread["Thread"]['receiver_id']];
 		if(!in_array($this->Auth->user('id'), $toCheck)) {
 			$this->redirect('/');
