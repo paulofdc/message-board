@@ -247,7 +247,7 @@ class UsersController extends AppController {
 				$filename = uniqid() . '_' . $photo['name'];
 		
 				if (move_uploaded_file($photo['tmp_name'], $uploadDir . DS . $filename)) {
-					return $filename;
+					return "/uploads/" . $filename;
 				} else {
 					return false;
 				}

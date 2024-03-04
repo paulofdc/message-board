@@ -20,7 +20,7 @@
                 $name = ($isReceiver) ? $thread['Owner']['name'] : $thread['Receiver']['name'];
                 $image = ($isReceiver) ? $thread['Owner']['photo'] : $thread['Receiver']['photo'];
                 if($image) {
-                    $photo = '/uploads/' . $image;
+                    $photo = $image;
                 } else {
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
                 }
@@ -36,10 +36,10 @@
                             <?php echo $name ?>
                         </div>
                         <div class="body">
-                            <?php echo $thread['Message'][0]['content'] ?>
+                            <?php echo $thread['Message'][0]['content'] ?? "" ?>
                         </div>
                         <div class="footer">
-                            <?php echo $threadController->dateToString($thread['Message'][0]['created'], true); ?>
+                            <?php echo $threadController->dateToString($thread['Message'][0]['created'] ?? "", true); ?>
                         </div>
                     </div>
                 </div>

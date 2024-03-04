@@ -1,14 +1,6 @@
 <?php
-    $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
-    if(AuthComponent::user('photo')) {
-        $photo = '/uploads/' . AuthComponent::user('photo');
-        
-    }
-
-    $photo = $this->Html->image($photo, [
-        'class' => 'avatar',
-        'alt' => 'Your Image'
-    ]);
+    $currentLoggedIn = AuthComponent::user('id');
+    $photoSrc = $this->Html->url('/');
 ?>
 <script>
     $(document).ready(function() {
@@ -56,6 +48,37 @@
             }
         });
 
+        $(document).on('click', '#load-more-btn', (e) => {
+            e.preventDefault();
+            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'loadMoreMessages']); ?>';
+            ajaxCall(url, 'POST', {
+                thread_id: $('#MessageThreadId').val(),
+                currentLatestOldestId: getLatestOldestId(),
+            }).then(response => {
+                const result = JSON.parse(response);
+                
+                if(result.hasLastData) {
+                    $('#load-btn-container').remove();
+                }
+
+                result.data.map((v) => {
+                    addMessage({
+                            created: v.Message.created,
+                            dataId: v.Message.id,
+                            content: v.Message.content,
+                            photo: v.User.photo
+                        }, 
+                        'append', 
+                        v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right'
+                    );
+                });
+
+            }).catch(error => {
+                console.error(error);
+                alert('There was a problem during getting the message. Please try again.');
+            });
+        });
+
         $(document).on('click', '#reply-btn', (e) => {
             e.preventDefault();
             if($('#MessageContent').val().trim()) {
@@ -64,6 +87,10 @@
                 alert('<?= __('Input some messages.') ?>');
             }
         });
+
+        const getLatestOldestId = () => {
+            return lastChild = $('.inbox-messages').children(':last-child').data("id");
+        }
 
         const reply = async () => {
             let url = '<?php echo $this->Html->url(['controller' => 'messages', 'action' => 'add']); ?>';
@@ -76,7 +103,8 @@
                     addMessage({
                         created: data.created,
                         dataId: data.dataId,
-                        content: $('#MessageContent').val()
+                        content: $('#MessageContent').val(),
+                        photo: '<?= AuthComponent::user('photo') ?>'
                     });
                     $('#MessageContent').val('');
                 } else {
@@ -125,11 +153,30 @@
             }
         };
 
-        const addMessage = (data) => {
+        const addMessage = (data, action = 'prepend', position = 'right') => {
+            if(data.hasOwnProperty('user_id')) {
+
+            }
+
+            let deleteBtn = `
+                <div class="delete-container delete-container-${data.dataId}">
+                    <span class="delete-message-btn" data-id="${data.dataId}">Delete</span>
+                </div>`;
+
+            if(position == 'left') {
+                deleteBtn = '';
+            }
+
+            if(data.photo) {
+                photo = `<img src="<?= $photoSrc ?>${(data.photo).replace(/^\//, '')}" class="avatar" alt="Your Image">`;
+            } else {
+                photo = `<img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp" class="avatar" alt="Your Image">`;
+            }
+
             const messageBlock = `
-                <div class="message-block m-block-${data.dataId} conversation c-right" data-id="${data.dataId}">
-                    <?= $photo ?>          
-                    <div class="message-content right-content">
+                <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
+                    ${photo}
+                    <div class="message-content ${position}-content">
                         <div class="body">
                             ${data.content}                
                         </div>
@@ -137,12 +184,15 @@
                             ${data.created}                   
                         </div>
                     </div>
-                    <div class="delete-container delete-container-${data.dataId}">
-                        <span class="delete-message-btn" data-id="${data.dataId}">Delete</span>
-                    </div>
+                    ${deleteBtn}
                 </div>
             `;
-            $('.inbox').prepend(messageBlock);
+
+            if(action == 'prepend') {
+                $('.inbox-messages').prepend(messageBlock);
+            } else {
+                $('.inbox-messages').append(messageBlock);
+            }
         }
     });
 </script>

@@ -9,6 +9,8 @@ App::uses('AppController', 'Controller');
  */
 class ThreadsController extends AppController {
 
+	public const DEFAULT_PAGE_SIZE = 5;
+
 	/**
 	 * Components
 	 *
@@ -72,7 +74,8 @@ class ThreadsController extends AppController {
 			'order' => 'Message.created DESC',
 			'conditions' => [
 				'thread_id' => $id
-			]
+			],
+			'limit' => self::DEFAULT_PAGE_SIZE
 		]);
 
 		$participant = $thread["Owner"]['id'] == $this->Auth->user('id') ? 
@@ -176,5 +179,36 @@ class ThreadsController extends AppController {
 			$this->Flash->error(__('The thread could not be deleted. Please, try again.'));
 		}
 		return $this->redirect(array('action' => 'index'));
+	}
+
+	/**
+	 * Load More Messages
+	 */
+	public function loadMoreMessages() {
+		$this->autoRender = false;
+		$requestData = $this->request->data;
+
+		$hasLastData = false;
+		$query = [
+			'order' => 'Message.created DESC',
+			'conditions' => [
+				'thread_id' => $requestData['thread_id'],
+				'Message.id <' => $requestData['currentLatestOldestId']
+			]
+		];
+
+		$lastRecord = $this->Message->find('first', $query);
+		
+		$query['limit'] = self::DEFAULT_PAGE_SIZE;
+		$messages = $this->Message->find('all', $query);
+		foreach($messages as $key => $message) {
+			$hasLastData = ($lastRecord['Message']['id'] == $message['Message']['id']);
+			$messages[$key]['Message']['created'] = $this->dateToString($message['Message']['created'], true);
+		}
+
+		echo json_encode([
+			'hasLastData' => $hasLastData,
+			'data' => $messages
+		]);
 	}
 }

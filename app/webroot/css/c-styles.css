@@ -60,7 +60,7 @@ html {
     margin-bottom: 10px;
 }
 
-.new-message-btn {
+.new-message-btn, #load-more-btn {
     text-decoration: none;
     border: 1px solid #ccc;
     display: inline-block;
@@ -68,6 +68,10 @@ html {
     cursor: pointer;
     background-color: #f9f9f9;
     border-radius: 4px;
+}
+
+#load-btn-container {
+    text-align: center;
 }
 
 .delete-message-btn {
