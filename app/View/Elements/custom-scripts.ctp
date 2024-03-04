@@ -6,8 +6,29 @@
     $(document).ready(function() {
         $('.select2-recipient').select2({
             width: 'resolve',
-            theme: "classic"
+            theme: "classic",
+            templateResult: formatOption
         });
+
+        function formatOption(option) {
+            console.log('option', option);
+            if (!option.id) {
+                return option.text;
+            }
+
+            let splitData = option.id.split("~USER:");
+            var imageUrl = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
+            if(splitData[1]) {
+                imageUrl = `<?= $photoSrc ?>${splitData[1].replace(/^\//, '')}`;
+            }
+            var optionText = option.text;
+
+            var $option = $(
+                '<span><img style="width: 20px; height: 20px; margin-right: 5px;" src="' + imageUrl + '" class="select2-option-image" /> ' + optionText + '</span>'
+            );
+
+            return $option;
+        }
 
         $(document).on('click', '#upload-btn', () => {
             $('#profile-image-upload').click();

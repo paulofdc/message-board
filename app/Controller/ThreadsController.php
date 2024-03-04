@@ -96,7 +96,7 @@ class ThreadsController extends AppController {
 		if ($this->request->is('post')) {
 			$userId = $this->Auth->user('id');
 			$this->request->data['Thread']['owner_id'] = $userId;
-			$this->request->data['Thread']['receiver_id'] = $this->request->data['Thread']['receivers'];
+			$this->request->data['Thread']['receiver_id'] = explode('~USER:', $this->request->data['Thread']['receivers'])[0];
 			$message = $this->request->data['Thread']['message'];
 			unset($this->request->data['Thread']['receivers']);
 			unset($this->request->data['Thread']['message']);
@@ -125,13 +125,20 @@ class ThreadsController extends AppController {
 			}
 		}
 
-		$receivers = $this->Thread->Receiver->find('list', [
+		$receivers = $this->Thread->Receiver->find('all', [
 			'conditions' => [
 				'Receiver.id !=' => $this->Auth->user('id')
-			]
+			],
+			'fields' => ['CONCAT(id, IF(photo IS NOT NULL, CONCAT("~USER:", photo), "")) AS id_photo', 'name'],
+			'recursive' => -1
 		]);
 
-		$this->set(compact('receivers'));
+		$restructuredReceivers = [];
+		foreach ($receivers as $receiver) {
+			$restructuredReceivers[$receiver[0]['id_photo']] = $receiver['Receiver']['name'];
+		}
+
+		$this->set(['receivers' => $restructuredReceivers]);
 	}
 
 	/**
@@ -198,7 +205,7 @@ class ThreadsController extends AppController {
 		];
 
 		$lastRecord = $this->Message->find('first', $query);
-		
+
 		$query['limit'] = self::DEFAULT_PAGE_SIZE;
 		$messages = $this->Message->find('all', $query);
 		foreach($messages as $key => $message) {
