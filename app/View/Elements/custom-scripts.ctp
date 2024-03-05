@@ -38,11 +38,18 @@
             clearTimeout(timeoutId);
             const type = $(e.target).data('type');
             let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'search']); ?>';
+
+            let payload = {
+                searchValue: $('#search').val(),
+                searchType: type
+            };
+
+            if(type == 'message') {
+                payload.thread_id = $('#MessageThreadId').val();
+            }
+
             timeoutId = setTimeout(() => {
-                ajaxCall(url, 'POST', {
-                    thread_id: $('#MessageThreadId').val(),
-                    searchValue: $('#search').val(),
-                }).then(response => {
+                ajaxCall(url, 'POST', payload).then(response => {
                     const result = JSON.parse(response);
                     console.log(result);
 
@@ -51,19 +58,41 @@
                         $('#load-btn-container').hide();
                         $('#search-container').show(); 
 
-                        $('.inbox-messages-search').empty();
+                        $('.inbox-search').empty();
                         if((result.data).length > 0) {
+                            $('.empty-m').hide();
                             result.data.map((v) => {
-                                addMessage({
-                                        created: v.Message.created,
-                                        dataId: v.Message.id,
-                                        content: v.Message.content,
-                                        photo: v.User.photo
-                                    }, 
-                                    'append', 
-                                    v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right',
-                                    '.inbox-messages-search'
-                                );
+                                switch(type) {
+                                    case 'thread':
+                                        let name = v.Owner.name,
+                                            photo = v.Owner.photo;
+                                        if(v.Owner.id == '<?= $currentLoggedIn ?>') {
+                                            name = v.Receiver.name;
+                                            photo = v.Receiver.photo;
+                                        }
+                                        addThread({
+                                                created: v.Thread.created,
+                                                dataId: v.Thread.id,
+                                                content: v.Message[0].content,
+                                                name: name,
+                                                photo: photo
+                                            },
+                                            '.inbox-search'
+                                        );
+                                        break;
+                                    case 'message':
+                                        addMessage({
+                                                created: v.Message.created,
+                                                dataId: v.Message.id,
+                                                content: v.Message.content,
+                                                photo: v.User.photo
+                                            }, 
+                                            'append', 
+                                            v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right',
+                                            '.inbox-search'
+                                        );
+                                        break;
+                                }
                             });
                         } else {
                             $('.empty-m').show();
@@ -80,45 +109,6 @@
                     alert('There was a problem during getting the message. Please try again.');
                 });
             }, 800);
-        });
-
-        $(document).on('click', '#upload-btn', () => {
-            $('#profile-image-upload').click();
-        });
-        
-        $(document).on('change', '#profile-image-upload', () => {
-            var fileName = $(this).val().split('\\').pop();
-        });
-
-        $(document).on('click', '.message-block', (e) => {
-            e.stopImmediatePropagation();
-            const dataId = $(e.target).data('id');
-            if(dataId) {
-                $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
-            }
-        });
-
-        $(document).on('click', '.delete-message-btn', (e) => {
-            e.stopImmediatePropagation();
-
-            if(confirm("<?= __('Are you sure you want to delete this?') ?>")){
-                const dataId = $(e.target).data('id');
-                let url = `<?php echo $this->Html->url(array('controller' => 'messages', 'action' => 'delete')); ?>`;
-                ajaxCall(url, 'POST', {
-                    id: dataId
-                }).then(response => {
-                    const data = JSON.parse(response);
-                    if(data.isSuccess) {
-                        $(`.m-block-${dataId}`).fadeOut( () => { $(`.m-block-${dataId}`).remove(); });
-                    } else {
-                        console.log(response);
-                        alert('There was a problem during deletion of message.');
-                    }
-                }).catch(error => {
-                    console.error(error);
-                    alert('There was a problem during deletion of message. Please try again.');
-                });
-            }
         });
 
         $(document).on('click', '#load-more-btn', (e) => {
@@ -177,6 +167,70 @@
                 console.error(error);
                 alert('There was a problem during getting the message. Please try again.');
             });
+        });
+
+        $(document).on('click', '#upload-btn', () => {
+            $('#profile-image-upload').click();
+        });
+        
+        $(document).on('click', '.delete-message-btn-thread', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if(confirm("<?= __('Are you sure you want to delete this?') ?>")){
+                const dataId = $(e.target).data('id');
+                console.log(dataId);
+                let url = `<?php echo $this->Html->url(array('controller' => 'threads', 'action' => 'delete')); ?>`;
+                ajaxCall(url, 'POST', {
+                    id: dataId
+                }).then(response => {
+                    const data = JSON.parse(response);
+                    if(data.isSuccess) {
+                        $(`.t-link-${dataId}`).fadeOut( () => { $(`.t-link-${dataId}`).remove(); });
+                    } else {
+                        console.log(response);
+                        alert('There was a problem during deletion of message.');
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    alert('There was a problem during deletion of message. Please try again.');
+                });
+            }
+        });
+
+        $(document).on('change', '#profile-image-upload', () => {
+            var fileName = $(this).val().split('\\').pop();
+        });
+
+        $(document).on('click', '.message-block, .message-content', (e) => {
+            e.stopImmediatePropagation();
+            const dataId = $(e.target).data('id');
+            console.log(dataId);
+            if(dataId) {
+                $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+            }
+        });
+
+        $(document).on('click', '.delete-message-btn', (e) => {
+            e.stopImmediatePropagation();
+
+            if(confirm("<?= __('Are you sure you want to delete this?') ?>")){
+                const dataId = $(e.target).data('id');
+                let url = `<?php echo $this->Html->url(array('controller' => 'messages', 'action' => 'delete')); ?>`;
+                ajaxCall(url, 'POST', {
+                    id: dataId
+                }).then(response => {
+                    const data = JSON.parse(response);
+                    if(data.isSuccess) {
+                        $(`.m-block-${dataId}`).fadeOut( () => { $(`.m-block-${dataId}`).remove(); });
+                    } else {
+                        console.log(response);
+                        alert('There was a problem during deletion of message.');
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    alert('There was a problem during deletion of message. Please try again.');
+                });
+            }
         });
 
         $(document).on('click', '#reply-btn', (e) => {
@@ -266,7 +320,7 @@
             const messageBlock = `
                 <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
                     ${displayPhoto(data.photo)}   
-                    <div class="message-content ${position}-content">
+                    <div class="message-content ${position}-content" data-id="${data.dataId}">
                         <div class="body">
                             ${data.content}                
                         </div>
@@ -285,9 +339,9 @@
             }
         }
 
-        const addThread = (data) => {
+        const addThread = (data, locationClass = '.inbox-messages') => {
             const threadBlock = `
-                <a class="thread-link" href="<?= $homeUrl ?>threads/view/${data.dataId}" data-id="${data.dataId}">
+                <a class="thread-link t-link-${data.dataId}" href="<?= $homeUrl ?>threads/view/${data.dataId}" data-id="${data.dataId}">
                     <div class="message-block">
                         ${displayPhoto(data.photo)}                      
                         <div class="message-content">
@@ -301,10 +355,13 @@
                                 ${data.created}                         
                             </div>
                         </div>
+                        <div class="delete-container-thread delete-thread-container-${data.dataId}">
+                            <span class="delete-message-btn-thread fa fa-trash-o" data-id="${data.dataId}"></span>
+                        </div>
                     </div>
                 </a>`;
             
-            $('.inbox-messages').append(threadBlock);
+            $(locationClass).append(threadBlock);
         }
 
         const displayPhoto = (image) => {

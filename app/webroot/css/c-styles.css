@@ -166,3 +166,18 @@ html {
     text-align: center;
     display: none;
 }
+
+.delete-container-thread {
+    width: 100%;
+    position: relative;
+}
+
+.delete-message-btn-thread {
+    position: absolute;
+    bottom: 3;
+    right: 0;
+}
+
+.message-content {
+    width: 80%;
+}

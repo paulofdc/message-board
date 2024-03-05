@@ -180,6 +180,39 @@ class ThreadsController extends AppController {
 	 * @return void
 	 */
 	public function delete($id = null) {
+        if ($this->request->is('ajax')) {
+			$this->autoRender = false;
+
+			$result = false;
+			$id = $this->request->data['id'];
+			$thread = $this->Thread->findById($id);
+
+			if (!$thread) {
+				echo json_encode([
+					'message' => __('Thread does not exist anymore. Please reload the page.')
+				]);
+				return;
+			}
+
+			$toCheck = [$thread['Thread']['owner_id'], $thread['Thread']['receiver_id']];
+			if(!in_array($this->Auth->user('id'), $toCheck)) {
+				echo json_encode([
+					'message' => __('Not allowed.')
+				]);
+				return;
+			}
+
+			$this->request->allowMethod('post', 'delete');
+			if ($this->Thread->delete($id)) {
+				$result = true;
+			}
+
+            echo json_encode([
+				'isSuccess' => $result
+			]);
+			return;
+        }
+
 		if (!$this->Thread->exists($id)) {
 			throw new NotFoundException(__('Invalid thread'));
 		}
@@ -252,22 +285,51 @@ class ThreadsController extends AppController {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
 		$searchKeyword = $requestData['searchValue'];
+		$type = ucfirst($requestData['searchType']);
 
-		$query = [
-			'order' => 'Message.created DESC',
-			'conditions' => [
-				'thread_id' => $requestData['thread_id'],
-				'Message.content LIKE' => '%' . $searchKeyword . '%'
-			]
-		];
+		$currentUserId = $this->Auth->user('id');
+		if($type == 'Message') {
+			$query = [
+				'order' => $type .'.created DESC',
+				'conditions' => [
+					'thread_id' => $requestData['thread_id'],
+					'Message.content LIKE' => '%' . $searchKeyword . '%'
+				]
+			];
+		} else if ($type == 'Thread') {
+			$query = [
+				'contain' => [
+					'Message' => [
+						'order' => 'Message.created DESC',
+						'limit' => 1,
+					],
+					'Owner', 
+					'Receiver'
+				],
+				'conditions' => [
+					'OR' => [
+						'Thread.owner_id' => $currentUserId,
+						'Thread.receiver_id' => $currentUserId
+					],
+					'AND' => [
+						'OR' => [
+							'Owner.name LIKE' => '%' . $searchKeyword . '%',
+							'Receiver.name LIKE' => '%' . $searchKeyword . '%'
+						]
+					]
+				]
+			];
+		}
 
-		$messages = $this->Message->find('all', $query);
-		foreach($messages as $key => $message) {
-			$messages[$key]['Message']['created'] = $this->dateToString($message['Message']['created'], true);
+	
+
+		$data = $this->$type->find('all', $query);
+		foreach($data as $key => $row) {
+			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
 		}
 
 		echo json_encode([
-			'data' => $messages
+			'data' => $data
 		]);
 	}
 }

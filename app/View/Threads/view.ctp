@@ -29,7 +29,7 @@
 
 	<div class="c-container inbox">
         <div class="c-container">
-        <input id="search-message" type="text" placeholder="Search message..."><br><br>
+        <input id="search" type="text" placeholder="Search message..." data-type="message"><br><br>
         </div>
         <?php $threadController = new ThreadsController(); ?>
         <?php $currentUser = (AuthComponent::user('id')); ?>
@@ -48,7 +48,7 @@
                         'class' => 'avatar',
                         'alt' => 'Your Image'
                     ]); ?>
-                    <div class="message-content <?= ($isSender) ? 'left-content' : 'right-content'?>">
+                    <div class="message-content <?= ($isSender) ? 'left-content' : 'right-content'?>" data-id="<?= $dataId ?>">
                         <div class="body">
                             <?php echo $message['Message']['content'] ?>
                         </div>
@@ -68,13 +68,13 @@
 
         <div id="search-container">
             <span class="empty-m">No data available</span>
-            <div class="inbox-messages-search"></div>
+            <div class="inbox-search"></div>
         </div>
 
         <?php if($messageCount > $maxLimit ) :?>
             <div id="load-btn-container" class="c-container">
                 <button id="load-more-btn" data-type="message">
-                    <?= __('Load more') ?>
+                    <?= __('Show more') ?>
                 </button>
             </div>
         <?php endif; ?>
