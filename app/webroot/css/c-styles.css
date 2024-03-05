@@ -157,3 +157,12 @@ html {
     border-radius: 50%;
     margin-right: 10px;
 }
+
+.search-container {
+    display: none;
+}
+
+.empty-m {
+    text-align: center;
+    display: none;
+}

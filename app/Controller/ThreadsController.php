@@ -66,10 +66,7 @@ class ThreadsController extends AppController {
 			$this->redirect('/');
 		}
 
-		if (!$this->Thread->exists($id)) {
-			throw new NotFoundException(__('Invalid thread'));
-		}
-
+		$messageCount = $this->Message->query("SELECT COUNT(*) as message_count FROM messages WHERE thread_id = ($id)")[0][0]['message_count'];
 		$messages = $this->Message->find('all', [
 			'order' => 'Message.created DESC',
 			'conditions' => [
@@ -77,10 +74,11 @@ class ThreadsController extends AppController {
 			],
 			'limit' => self::DEFAULT_PAGE_SIZE
 		]);
-
 		$participant = $thread["Owner"]['id'] == $this->Auth->user('id') ? 
 						$thread["Receiver"]['name'] : $thread["Owner"]['name'];
 		$this->set([
+			'maxLimit' => self::DEFAULT_PAGE_SIZE,
+			'messageCount' => $messageCount,
 			'participant' => $participant,
 			'threadId' => $id,
 			'messages' => $messages
@@ -196,7 +194,7 @@ class ThreadsController extends AppController {
 		$requestData = $this->request->data;
 
 		$hasLastData = false;
-		$query = [
+		$lastRecordQuery = $query = [
 			'order' => 'Message.created DESC',
 			'conditions' => [
 				'thread_id' => $requestData['thread_id'],
@@ -204,7 +202,8 @@ class ThreadsController extends AppController {
 			]
 		];
 
-		$lastRecord = $this->Message->find('first', $query);
+		$lastRecordQuery['order'] = 'Message.created ASC';
+		$lastRecord = $this->Message->find('first', $lastRecordQuery);
 
 		$query['limit'] = self::DEFAULT_PAGE_SIZE;
 		$messages = $this->Message->find('all', $query);
@@ -215,6 +214,29 @@ class ThreadsController extends AppController {
 
 		echo json_encode([
 			'hasLastData' => $hasLastData,
+			'data' => $messages
+		]);
+	}
+
+	public function search() {
+		$this->autoRender = false;
+		$requestData = $this->request->data;
+		$searchKeyword = $requestData['searchMessage'];
+
+		$query = [
+			'order' => 'Message.created DESC',
+			'conditions' => [
+				'thread_id' => $requestData['thread_id'],
+				'Message.content LIKE' => '%' . $searchKeyword . '%'
+			]
+		];
+
+		$messages = $this->Message->find('all', $query);
+		foreach($messages as $key => $message) {
+			$messages[$key]['Message']['created'] = $this->dateToString($message['Message']['created'], true);
+		}
+
+		echo json_encode([
 			'data' => $messages
 		]);
 	}

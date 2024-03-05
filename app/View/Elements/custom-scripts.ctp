@@ -4,6 +4,8 @@
 ?>
 <script>
     $(document).ready(function() {
+        let timeoutId; 
+
         $('.select2-recipient').select2({
             width: 'resolve',
             theme: "classic",
@@ -29,6 +31,54 @@
 
             return $option;
         }
+
+        $(document).on('keyup', '#search-message', (e) => {
+            e.stopPropagation();
+            clearTimeout(timeoutId);
+            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'search']); ?>';
+            timeoutId = setTimeout(() => {
+                ajaxCall(url, 'POST', {
+                    thread_id: $('#MessageThreadId').val(),
+                    searchMessage: $('#search-message').val(),
+                }).then(response => {
+                    const result = JSON.parse(response);
+                    console.log(result);
+
+                    if($('#search-message').val()) {
+                        $('.inbox-messages').hide();
+                        $('#load-btn-container').hide();
+                        $('#search-container').show(); 
+
+                        $('.inbox-messages-search').empty();
+                        if((result.data).length > 0) {
+                            result.data.map((v) => {
+                                addMessage({
+                                        created: v.Message.created,
+                                        dataId: v.Message.id,
+                                        content: v.Message.content,
+                                        photo: v.User.photo
+                                    }, 
+                                    'append', 
+                                    v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right',
+                                    '.inbox-messages-search'
+                                );
+                            });
+                        } else {
+                            $('.empty-m').show();
+                        }
+                    } else {
+                        $('#search-container').hide(); 
+                        $('.inbox-messages').show();
+                        $('#load-btn-container').show();
+                    }
+
+
+                }).catch(error => {
+                    console.error(error);
+                    alert('There was a problem during getting the message. Please try again.');
+                });
+            }, 800);
+        });
 
         $(document).on('click', '#upload-btn', () => {
             $('#profile-image-upload').click();
@@ -77,7 +127,7 @@
                 currentLatestOldestId: getLatestOldestId(),
             }).then(response => {
                 const result = JSON.parse(response);
-                
+                console.log('loadMore', result);
                 if(result.hasLastData) {
                     $('#load-btn-container').remove();
                 }
@@ -174,7 +224,7 @@
             }
         };
 
-        const addMessage = (data, action = 'prepend', position = 'right') => {
+        const addMessage = (data, action = 'prepend', position = 'right', locationClass = '.inbox-messages') => {
             if(data.hasOwnProperty('user_id')) {
 
             }
@@ -210,9 +260,9 @@
             `;
 
             if(action == 'prepend') {
-                $('.inbox-messages').prepend(messageBlock);
+                $(locationClass).prepend(messageBlock);
             } else {
-                $('.inbox-messages').append(messageBlock);
+                $(locationClass).append(messageBlock);
             }
         }
     });

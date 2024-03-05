@@ -28,6 +28,9 @@
     </div>
 
 	<div class="c-container inbox">
+        <div class="c-container">
+            <input id="search-message" type="text" placeholder="Search message..."><br><br>
+        </div>
         <?php $threadController = new ThreadsController(); ?>
         <?php $currentUser = (AuthComponent::user('id')); ?>
         <div class="inbox-messages">
@@ -63,11 +66,18 @@
         </div>
         <?php unset($thread); ?>
 
-        <div id="load-btn-container" class="c-container">
-            <button id="load-more-btn">
-                <?= __('Load more') ?>
-            </button>
+        <div id="search-container">
+            <span class="empty-m">No data available</span>
+            <div class="inbox-messages-search"></div>
         </div>
+
+        <?php if($messageCount > $maxLimit ) :?>
+            <div id="load-btn-container" class="c-container">
+                <button id="load-more-btn">
+                    <?= __('Load more') ?>
+                </button>
+            </div>
+        <?php endif; ?>
 	</div>
 
 </div>
