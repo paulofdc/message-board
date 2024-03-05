@@ -59,7 +59,7 @@ class Thread extends AppModel {
 		'Message' => array(
 			'className' => 'Message',
 			'foreignKey' => 'thread_id',
-			'dependent' => false,
+			'dependent' => true,
 			'conditions' => '',
 			'fields' => '',
 			'order' => '',
