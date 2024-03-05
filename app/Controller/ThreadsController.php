@@ -28,6 +28,7 @@ class ThreadsController extends AppController {
 	public function index() {
 		$ownerId = $this->Auth->user('id');
 		$threads = $this->Thread->find('all', [
+			'order' => 'Thread.created DESC',
 			'contain' => [
 				'Message' => [
 					'order' => 'Message.created DESC',
@@ -42,10 +43,16 @@ class ThreadsController extends AppController {
 					'Thread.receiver_id' => $ownerId
 				]
 			],
-			'limit' => 10
+			'limit' => self::DEFAULT_PAGE_SIZE
 		]);
 
-		$this->set('threads', $threads);
+		$currentUserId = $this->Auth->user('id');
+		$threadCount = $this->Message->query("SELECT COUNT(*) as thread_count FROM threads WHERE owner_id = ($currentUserId) OR receiver_id = ($currentUserId)")[0][0]['thread_count'];
+		$this->set([
+			'maxLimit' => self::DEFAULT_PAGE_SIZE,
+			'threadCount' => $threadCount,
+			'threads' => $threads
+		]);
 	}
 
 	/**
@@ -102,7 +109,6 @@ class ThreadsController extends AppController {
 			$this->Thread->create();
 			if ($this->Thread->save($this->request->data)) {
 				$threadId = $this->Thread->id;
-				debug($threadId);
 				$this->Message->create();
 				if ($this->Message->save([
 						'Message' => [
@@ -187,41 +193,65 @@ class ThreadsController extends AppController {
 	}
 
 	/**
-	 * Load More Messages
+	 * Load More for both Threads and Messages
 	 */
-	public function loadMoreMessages() {
+	public function loadMore() {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
+		$type = ucfirst($requestData['searchType']) ?? '';
+
+		$allowedTypes = ['Thread', 'Message'];
+		if(!in_array($type, $allowedTypes)) {
+			echo json_encode([
+				'message' => __('Not allowed.')
+			]);
+			return;
+		}
 
 		$hasLastData = false;
-		$lastRecordQuery = $query = [
-			'order' => 'Message.created DESC',
+		$query = [
+			'order' => $type .'.created DESC',
 			'conditions' => [
-				'thread_id' => $requestData['thread_id'],
-				'Message.id <' => $requestData['currentLatestOldestId']
+				$type . '.id <' => $requestData['currentLatestOldestId']
 			]
 		];
 
-		$lastRecordQuery['order'] = 'Message.created ASC';
-		$lastRecord = $this->Message->find('first', $lastRecordQuery);
+		$currentUserId = $this->Auth->user('id');
+		if($type == 'Message') {
+			$query['conditions']['thread_id'] = $requestData['thread_id'];
+		} else if ($type == 'Thread') {
+			$query['contain'][] = 'Owner';
+			$query['contain'][] = 'Receiver';
+			$query['contain']['Message']['order'] = 'Message.created DESC';
+			$query['contain']['Message']['limit'] = 1;
+			$query['conditions']['OR'] = [
+				'Thread.owner_id' => $currentUserId,
+				'Thread.receiver_id' => $currentUserId
+			];
+		}
+
+		$lastRecordQuery = $query;
+		$lastRecordQuery['order'] = $type . '.created ASC';
+		$lastRecord = $this->$type->find('first', $lastRecordQuery);
 
 		$query['limit'] = self::DEFAULT_PAGE_SIZE;
-		$messages = $this->Message->find('all', $query);
-		foreach($messages as $key => $message) {
-			$hasLastData = ($lastRecord['Message']['id'] == $message['Message']['id']);
-			$messages[$key]['Message']['created'] = $this->dateToString($message['Message']['created'], true);
+		$data = $this->$type->find('all', $query);
+		foreach($data as $key => $row) {
+			$hasLastData = ($lastRecord[$type]['id'] == $row[$type]['id']);
+			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
 		}
 
 		echo json_encode([
+			'query' => $query,
 			'hasLastData' => $hasLastData,
-			'data' => $messages
+			'data' => $data
 		]);
 	}
 
 	public function search() {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
-		$searchKeyword = $requestData['searchMessage'];
+		$searchKeyword = $requestData['searchValue'];
 
 		$query = [
 			'order' => 'Message.created DESC',

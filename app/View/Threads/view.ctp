@@ -29,7 +29,7 @@
 
 	<div class="c-container inbox">
         <div class="c-container">
-            <input id="search-message" type="text" placeholder="Search message..."><br><br>
+        <input id="search-message" type="text" placeholder="Search message..."><br><br>
         </div>
         <?php $threadController = new ThreadsController(); ?>
         <?php $currentUser = (AuthComponent::user('id')); ?>
@@ -73,7 +73,7 @@
 
         <?php if($messageCount > $maxLimit ) :?>
             <div id="load-btn-container" class="c-container">
-                <button id="load-more-btn">
+                <button id="load-more-btn" data-type="message">
                     <?= __('Load more') ?>
                 </button>
             </div>

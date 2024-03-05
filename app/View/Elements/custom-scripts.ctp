@@ -1,9 +1,10 @@
 <?php
     $currentLoggedIn = AuthComponent::user('id');
-    $photoSrc = $this->Html->url('/');
+    $homeUrl = $this->Html->url('/');
 ?>
 <script>
     $(document).ready(function() {
+        let defaultPhoto = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
         let timeoutId; 
 
         $('.select2-recipient').select2({
@@ -19,9 +20,9 @@
             }
 
             let splitData = option.id.split("~USER:");
-            var imageUrl = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
+            var imageUrl = defaultPhoto;
             if(splitData[1]) {
-                imageUrl = `<?= $photoSrc ?>${splitData[1].replace(/^\//, '')}`;
+                imageUrl = `<?= $homeUrl ?>${splitData[1].replace(/^\//, '')}`;
             }
             var optionText = option.text;
 
@@ -32,19 +33,20 @@
             return $option;
         }
 
-        $(document).on('keyup', '#search-message', (e) => {
+        $(document).on('keyup', '#search', (e) => {
             e.stopPropagation();
             clearTimeout(timeoutId);
+            const type = $(e.target).data('type');
             let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'search']); ?>';
             timeoutId = setTimeout(() => {
                 ajaxCall(url, 'POST', {
                     thread_id: $('#MessageThreadId').val(),
-                    searchMessage: $('#search-message').val(),
+                    searchValue: $('#search').val(),
                 }).then(response => {
                     const result = JSON.parse(response);
                     console.log(result);
 
-                    if($('#search-message').val()) {
+                    if($('#search').val()) {
                         $('.inbox-messages').hide();
                         $('#load-btn-container').hide();
                         $('#search-container').show(); 
@@ -121,11 +123,19 @@
 
         $(document).on('click', '#load-more-btn', (e) => {
             e.preventDefault();
-            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'loadMoreMessages']); ?>';
-            ajaxCall(url, 'POST', {
-                thread_id: $('#MessageThreadId').val(),
+            const type = $(e.target).data('type');
+            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'loadMore']); ?>';
+
+            let payload = {
                 currentLatestOldestId: getLatestOldestId(),
-            }).then(response => {
+                searchType: type
+            };
+
+            if(type == 'message') {
+                payload.thread_id = $('#MessageThreadId').val();
+            }
+            
+            ajaxCall(url, 'POST', payload).then(response => {
                 const result = JSON.parse(response);
                 console.log('loadMore', result);
                 if(result.hasLastData) {
@@ -133,17 +143,36 @@
                 }
 
                 result.data.map((v) => {
-                    addMessage({
-                            created: v.Message.created,
-                            dataId: v.Message.id,
-                            content: v.Message.content,
-                            photo: v.User.photo
-                        }, 
-                        'append', 
-                        v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right'
-                    );
+                    switch(type) {
+                        case 'thread':
+                            let name = v.Owner.name,
+                                photo = v.Owner.photo;
+                            if(v.Owner.id == '<?= $currentLoggedIn ?>') {
+                                name = v.Receiver.name;
+                                photo = v.Receiver.photo;
+                            }
+                            addThread({
+                                    created: v.Message.created,
+                                    dataId: v.Thread.id,
+                                    content: v.Message[0].content,
+                                    name: name,
+                                    photo: photo
+                                }
+                            );
+                            break;
+                        case 'message':
+                            addMessage({
+                                    created: v.Message.created,
+                                    dataId: v.Message.id,
+                                    content: v.Message.content,
+                                    photo: v.User.photo
+                                }, 
+                                'append', 
+                                v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right'
+                            );
+                            break;
+                    }
                 });
-
             }).catch(error => {
                 console.error(error);
                 alert('There was a problem during getting the message. Please try again.');
@@ -225,10 +254,6 @@
         };
 
         const addMessage = (data, action = 'prepend', position = 'right', locationClass = '.inbox-messages') => {
-            if(data.hasOwnProperty('user_id')) {
-
-            }
-
             let deleteBtn = `
                 <div class="delete-container delete-container-${data.dataId}">
                     <span class="delete-message-btn" data-id="${data.dataId}">Delete</span>
@@ -238,15 +263,9 @@
                 deleteBtn = '';
             }
 
-            if(data.photo) {
-                photo = `<img src="<?= $photoSrc ?>${(data.photo).replace(/^\//, '')}" class="avatar" alt="Your Image">`;
-            } else {
-                photo = `<img src="https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp" class="avatar" alt="Your Image">`;
-            }
-
             const messageBlock = `
                 <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
-                    ${photo}
+                    ${displayPhoto(data.photo)}   
                     <div class="message-content ${position}-content">
                         <div class="body">
                             ${data.content}                
@@ -264,6 +283,36 @@
             } else {
                 $(locationClass).append(messageBlock);
             }
+        }
+
+        const addThread = (data) => {
+            const threadBlock = `
+                <a class="thread-link" href="<?= $homeUrl ?>threads/view/${data.dataId}" data-id="${data.dataId}">
+                    <div class="message-block">
+                        ${displayPhoto(data.photo)}                      
+                        <div class="message-content">
+                            <div class="header">
+                                ${data.name}
+                            </div>
+                            <div class="body">
+                                ${data.content}                       
+                            </div>
+                            <div class="footer">
+                                ${data.created}                         
+                            </div>
+                        </div>
+                    </div>
+                </a>`;
+            
+            $('.inbox-messages').append(threadBlock);
+        }
+
+        const displayPhoto = (image) => {
+            photo = `<img src="${defaultPhoto}" class="avatar" alt="Your Image">`;
+            if(image) {
+                photo = `<img src="<?= $homeUrl ?>${(image).replace(/^\//, '')}" class="avatar" alt="Your Image">`;
+            }
+            return photo;
         }
     });
 </script>
