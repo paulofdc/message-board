@@ -152,7 +152,7 @@
                                 photo = v.Receiver.photo;
                             }
                             addThread({
-                                    created: v.Message.created,
+                                    created: v.Thread.created,
                                     dataId: v.Thread.id,
                                     content: v.Message[0].content,
                                     name: name,
