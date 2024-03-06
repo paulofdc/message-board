@@ -28,10 +28,11 @@ class User extends AppModel {
 		'email' => array(
 			'email' => array(
 				'rule' => array('email'),
+				'message' => 'Please input valid email address.'
 			),
             'unique' => array(
                 'rule' => 'isUnique',
-                'message' => 'This email address is already in use'
+                'message' => 'This email address is already in use.'
             ),
 		),
 		'password' => array(
@@ -40,23 +41,23 @@ class User extends AppModel {
 			),
 			'Match passwords' => [
 				'rule' => ['matchPasswords'],
-				'message' => 'Your passwords do not match',
+				'message' => 'Your passwords do not match.',
 			]
 		),
 		'confirm_password' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Please confirm your password',
+				'message' => 'Please confirm your password.',
 			)
 		),
 		'current_password' => array(
 			'Current Password' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Current password is required',
+				'message' => 'Current password is required.',
 			),
 			'Current Password Checker' => [
 				'rule' => ['currentPasswordChecker'],
-				'message' => 'Your inputted password does not match with the current password',
+				'message' => 'Your inputted password does not match with the current password.',
 			]
 		),
 		'gender' => array(
@@ -74,7 +75,7 @@ class User extends AppModel {
 		'birthdate' => array(
 			'date' => array(
 				'rule' => array('date'),
-				'message' => 'Birthdate is required',
+				'message' => 'Birthdate is required.',
 				//'allowEmpty' => false,
 				//'required' => false,
 				//'last' => false, // Stop validation after this rule
@@ -91,21 +92,22 @@ class User extends AppModel {
 		'other_details' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Other Details is required',
+				'message' => 'Other Details is required.',
 			),
 		),
 
 		'current_email_address' => array(
 			'email' => array(
 				'rule' => array('email'),
+				'message' => 'Please input valid email address.'
 			),
 			'Current Email Required' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Current Email is required',
+				'message' => 'Current Email is required.',
 			),
 			'Current Email Checker' => [
 				'rule' => ['currentEmailChecker'],
-				'message' => 'Your inputted Email does not match with the current Email',
+				'message' => 'Your inputted email does not match with the current email.',
 			]
 		),
 		'new_email_address' => array(
@@ -114,17 +116,17 @@ class User extends AppModel {
 			),
             'Email Unique' => [
 				'rule' => ['checkEmailIfAlreadyExists'],
-				'message' => 'This email address is already in use',
+				'message' => 'This email address is already in use.',
 			],
 			'Match Email' => [
 				'rule' => ['matchEmails'],
-				'message' => 'Your emails do not match',
+				'message' => 'Your emails do not match.',
 			]
 		),
 		'confirm_new_email_address' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Please confirm your password',
+				'message' => 'Please confirm your password.',
 			)
 		)
 	);
