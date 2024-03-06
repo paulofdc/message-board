@@ -8,11 +8,24 @@ App::uses('AppModel', 'Model');
  */
 class Message extends AppModel {
 
-/**
- * Validation rules
- *
- * @var array
- */
+	/**
+	 * Before Save
+	 */
+    public function beforeSave($options = array()) {
+        parent::beforeSave($options);
+        if (!empty($this->data['Message']['thread_id'])) {
+            $threadId = $this->data['Message']['thread_id'];
+            $this->Thread->id = $threadId;
+            $this->Thread->saveField('modified', $this->data['Message']['created']);
+        }
+        return true;
+    }
+
+	/**
+	 * Validation rules
+	 *
+	 * @var array
+	 */
 	public $validate = array(
 		'thread_id' => array(
 			'numeric' => array(

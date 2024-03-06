@@ -21,7 +21,7 @@
             <?php foreach ($threads as $thread): ?>
                 <?php
                     $dataId = $thread['Thread']['id'];
-                    $messageOwner = $thread['Message'][0]['user_id'];
+                    $messageOwner = $thread['Message'][0]['user_id'] ?? '';
                     $isReceiver = AuthComponent::user('id') == $thread['Thread']['receiver_id'];
                     $name = ($isReceiver) ? $thread['Owner']['name'] : $thread['Receiver']['name'];
                     $image = ($isReceiver) ? $thread['Owner']['photo'] : $thread['Receiver']['photo'];
@@ -45,7 +45,7 @@
                                 <?php echo $thread['Message'][0]['content'] ?? "" ?>
                             </div>
                             <div class="footer">
-                                <?php echo $threadController->dateToString($thread['Message'][0]['created'] ?? "", true); ?>
+                                <?php echo $threadController->dateToString($thread['Message'][0]['modified'] ?? "", true); ?>
                             </div>
                         </div>
                         <div class="delete-container-thread delete-thread-container-<?= $dataId ?>">
@@ -62,6 +62,7 @@
         </div>
 
         <?php if($threadCount > $maxLimit ) :?>
+            <input type="hidden" id="count" value="<?= $threadCount ?>">
             <div id="load-btn-container" class="c-container">
                 <button id="load-more-btn" data-type="thread">
                     <?= __('Show more') ?>

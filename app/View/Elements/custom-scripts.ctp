@@ -72,7 +72,7 @@
                                         }
                                         addThread({
                                                 messageOwner: v.Message[0].user_id,
-                                                created: v.Thread.created,
+                                                modified: v.Thread.modified,
                                                 dataId: v.Thread.id,
                                                 content: v.Message[0].content,
                                                 name: name,
@@ -117,10 +117,14 @@
             e.preventDefault();
             const type = $(e.target).data('type');
             let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'loadMore']); ?>';
-
+            let childElement = (type == 'thread') ? 'a' : '.message-block';
+            let offset = $(`.inbox-messages ${childElement}`).length;
+            console.log('childElement', childElement);
+            console.log('offset', offset);
             let payload = {
                 currentLatestOldestId: getLatestOldestId(),
-                searchType: type
+                searchType: type,
+                offset: offset
             };
 
             if(type == 'message') {
@@ -130,10 +134,9 @@
             ajaxCall(url, 'POST', payload).then(response => {
                 const result = JSON.parse(response);
                 console.log('loadMore', result);
-                if(result.hasLastData) {
+                if(result.offset >= $('#count').val()) {
                     $('#load-btn-container').remove();
                 }
-
                 result.data.map((v) => {
                     switch(type) {
                         case 'thread':
@@ -145,7 +148,7 @@
                             }
                             addThread({
                                     messageOwner: v.Message[0].user_id,
-                                    created: v.Thread.created,
+                                    modified: v.Thread.modified,
                                     dataId: v.Thread.id,
                                     content: v.Message[0].content,
                                     name: name,
@@ -207,11 +210,11 @@
 
         $(document).on('click', '.message-block, .message-content', (e) => {
             e.stopImmediatePropagation();
-            const dataId = $(e.target).data('id');
-            console.log(dataId);
-            if(dataId) {
-                $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+            let dataId = $(e.target).data('id');
+            if(!dataId) { 
+                dataId = $(e.target).parent().data('id');
             }
+            $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
         });
 
         $(document).on('click', '.delete-message-btn', (e) => {
@@ -359,7 +362,7 @@
                                 ${data.content}                       
                             </div>
                             <div class="footer">
-                                ${data.created}                         
+                                ${data.modified}                         
                             </div>
                         </div>
                         <div class="delete-container-thread delete-thread-container-${data.dataId}">

@@ -37,7 +37,7 @@
             <?php foreach ($messages as $message): ?>
                 <?php
                     $dataId = $message['Message']['id'];
-                    $messageOwner = $message['Message']['user_id'];
+                    $messageOwner = $message['Message']['user_id'] ?? '';
                     $isSender = ($currentUser != $messageOwner);
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
                     if($message['User']['photo']) {
@@ -75,6 +75,7 @@
         </div>
 
         <?php if($messageCount > $maxLimit ) :?>
+            <input type="hidden" id="count" value="<?= $messageCount ?>">
             <div id="load-btn-container" class="c-container">
                 <button id="load-more-btn" data-type="message">
                     <?= __('Show more') ?>

@@ -9,7 +9,7 @@ App::uses('AppController', 'Controller');
  */
 class ThreadsController extends AppController {
 
-	public const DEFAULT_PAGE_SIZE = 5;
+	public const DEFAULT_PAGE_SIZE = 1;
 
 	/**
 	 * Components
@@ -28,7 +28,7 @@ class ThreadsController extends AppController {
 	public function index() {
 		$ownerId = $this->Auth->user('id');
 		$threads = $this->Thread->find('all', [
-			'order' => 'Thread.created DESC',
+			'order' => 'Thread.modified DESC',
 			'contain' => [
 				'Message' => [
 					'order' => 'Message.created DESC',
@@ -47,7 +47,7 @@ class ThreadsController extends AppController {
 		]);
 
 		$currentUserId = $this->Auth->user('id');
-		$threadCount = $this->Message->query("SELECT COUNT(*) as thread_count FROM threads WHERE owner_id = ($currentUserId) OR receiver_id = ($currentUserId)")[0][0]['thread_count'];
+		$threadCount = $this->Thread->query("SELECT COUNT(*) as thread_count FROM threads WHERE owner_id = ($currentUserId) OR receiver_id = ($currentUserId)")[0][0]['thread_count'];
 		$this->set([
 			'maxLimit' => self::DEFAULT_PAGE_SIZE,
 			'threadCount' => $threadCount,
@@ -256,6 +256,7 @@ class ThreadsController extends AppController {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
 		$type = ucfirst($requestData['searchType']) ?? '';
+		$offset = $requestData['offset'] ?? 0;
 
 		$allowedTypes = ['Thread', 'Message'];
 		if(!in_array($type, $allowedTypes)) {
@@ -265,42 +266,49 @@ class ThreadsController extends AppController {
 			return;
 		}
 
-		$hasLastData = false;
-		$query = [
-			'order' => $type .'.created DESC',
-			'conditions' => [
-				$type . '.id <' => $requestData['currentLatestOldestId']
-			]
-		];
-
 		$currentUserId = $this->Auth->user('id');
 		if($type == 'Message') {
-			$query['conditions']['thread_id'] = $requestData['thread_id'];
-		} else if ($type == 'Thread') {
-			$query['contain'][] = 'Owner';
-			$query['contain'][] = 'Receiver';
-			$query['contain']['Message']['order'] = 'Message.created DESC';
-			$query['contain']['Message']['limit'] = 1;
-			$query['conditions']['OR'] = [
-				'Thread.owner_id' => $currentUserId,
-				'Thread.receiver_id' => $currentUserId
+			$options = [
+				'order' => $type .'.created DESC',
+				'conditions' => [
+					'thread_id' => $requestData['thread_id']
+				],
+				'limit' => self::DEFAULT_PAGE_SIZE,
+				'offset' => $offset
 			];
+			$orderColumn = 'created';
+		} else if ($type == 'Thread') {
+			$options = [
+				'order' => $type .'.modified DESC',
+				'contain' => [
+					'Message' => [
+						'order' => 'Message.created DESC',
+						'limit' => 1
+					],
+					'Owner',
+					'Receiver',
+				],
+				'conditions' => [
+					'OR' => [
+						'Thread.owner_id' => $currentUserId,
+						'Thread.receiver_id' => $currentUserId
+					]
+				],
+				'limit' => self::DEFAULT_PAGE_SIZE,
+				'offset' => $offset
+			];
+			$orderColumn = 'modified';
 		}
 
-		$lastRecordQuery = $query;
-		$lastRecordQuery['order'] = $type . '.created ASC';
-		$lastRecord = $this->$type->find('first', $lastRecordQuery);
-
-		$query['limit'] = self::DEFAULT_PAGE_SIZE;
-		$data = $this->$type->find('all', $query);
+		$data = $this->$type->find('all', $options);
 		foreach($data as $key => $row) {
-			$hasLastData = ($lastRecord[$type]['id'] == $row[$type]['id']);
-			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
+			$data[$key][$type][$orderColumn] = $this->dateToString($row[$type][$orderColumn], true);
 		}
 
 		echo json_encode([
-			'query' => $query,
-			'hasLastData' => $hasLastData,
+			'query' => $options,
+			'offset' => $offset + self::DEFAULT_PAGE_SIZE,
+			'hasLastData' => false,
 			'data' => $data
 		]);
 	}
