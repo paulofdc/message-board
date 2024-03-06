@@ -106,9 +106,28 @@ class ThreadsController extends AppController {
 			unset($this->request->data['Thread']['receivers']);
 			unset($this->request->data['Thread']['message']);
 
-			$this->Thread->create();
-			if ($this->Thread->save($this->request->data)) {
-				$threadId = $this->Thread->id;
+			$options = [
+				'conditions' => [
+					'owner_id' => $this->request->data['Thread']['owner_id'],
+					'receiver_id' => $this->request->data['Thread']['receiver_id']
+				],
+				'limit' => 1
+			];
+			$existingThread = $this->Thread->find('first', $options);
+
+			$threadId = $isOldConvo = false;
+			if($existingThread) {
+				$isOldConvo = $threadId = $existingThread['Thread']['id'];
+			} else {
+				$this->Thread->create();
+				if(!$this->Thread->save($this->request->data)) {
+					$this->Flash->error(__('The message could not be created. Please, try again.'));
+				} else {
+					$threadId = $this->Thread->id;
+				}
+			}
+
+			if($threadId) {
 				$this->Message->create();
 				if ($this->Message->save([
 						'Message' => [
@@ -119,13 +138,18 @@ class ThreadsController extends AppController {
 					])
 				) {
 					$this->Flash->success(__('The message has been created.'));
-					return $this->redirect(['action' => 'index']);
+
+					if($isOldConvo) {
+						return $this->redirect(['action' => 'view', $threadId]);
+					} else {
+						return $this->redirect(['action' => 'index']);
+					}
 				} else {
-					$this->Thread->delete($threadId);
+					if(!$isOldConvo) {
+						$this->Thread->delete($threadId);
+					}
 					$this->Flash->error(__('Failed to create message.'));
 				}
-			} else {
-				$this->Flash->error(__('The message could not be created. Please, try again.'));
 			}
 		}
 
