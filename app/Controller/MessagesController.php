@@ -85,7 +85,8 @@ class MessagesController extends AppController {
             echo json_encode([
 				'isSuccess' => $result,
 				'dataId' => $insertedId,
-				'created' => ($result) ? $this->dateToString($this->Message->field('created', ['id' => $insertedId]), true) : ''
+				'created' => ($result) ? $this->dateToString($this->Message->field('created', ['id' => $insertedId]), true) : '',
+				'messageOwner' => $this->Auth->user('id')
 			]);
 
             return;

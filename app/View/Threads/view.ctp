@@ -37,17 +37,20 @@
             <?php foreach ($messages as $message): ?>
                 <?php
                     $dataId = $message['Message']['id'];
-                    $isSender = ($currentUser != $message['Message']['user_id']);
+                    $messageOwner = $message['Message']['user_id'];
+                    $isSender = ($currentUser != $messageOwner);
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
                     if($message['User']['photo']) {
                         $photo = $message['User']['photo'];
                     }
                 ?>
                 <div class="message-block m-block-<?= $dataId ?> conversation <?= ($isSender) ? 'c-left' : 'c-right'?>" data-id="<?= $dataId ?>">
-                    <?= $this->Html->image($photo, [
-                        'class' => 'avatar',
-                        'alt' => 'Your Image'
-                    ]); ?>
+                    <a href="<?= $this->Html->url(['controller' => 'users', 'action' => 'profile', $messageOwner]) ?>" target="_blank">
+                        <?= $this->Html->image($photo, [
+                            'class' => 'avatar',
+                            'alt' => 'Your Image'
+                        ]); ?>
+                    </a>
                     <div class="message-content <?= ($isSender) ? 'left-content' : 'right-content'?>" data-id="<?= $dataId ?>">
                         <div class="body">
                             <?php echo $message['Message']['content'] ?>

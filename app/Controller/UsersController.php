@@ -144,7 +144,7 @@ class UsersController extends AppController {
 		$user = $this->User->findById($id);
 
 		if (!$user) {
-			throw new NotFoundException(__('User not found'));
+			return $this->redirect('/');
 		}
 
 		$userData = $user['User'];

@@ -109,10 +109,10 @@ html {
 
 .c-right {
     flex-direction: row;
+    cursor: pointer;
 }
 
 .message-block {
-    cursor: pointer;
     background: transparent;
     border: 1px solid #ccc;
     border-radius: 5px;

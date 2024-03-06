@@ -71,6 +71,7 @@
                                             photo = v.Receiver.photo;
                                         }
                                         addThread({
+                                                messageOwner: v.Message[0].user_id,
                                                 created: v.Thread.created,
                                                 dataId: v.Thread.id,
                                                 content: v.Message[0].content,
@@ -85,7 +86,8 @@
                                                 created: v.Message.created,
                                                 dataId: v.Message.id,
                                                 content: v.Message.content,
-                                                photo: v.User.photo
+                                                photo: v.User.photo,
+                                                messageOwner: v.Message.user_id
                                             }, 
                                             'append', 
                                             v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right',
@@ -142,6 +144,7 @@
                                 photo = v.Receiver.photo;
                             }
                             addThread({
+                                    messageOwner: v.Message[0].user_id,
                                     created: v.Thread.created,
                                     dataId: v.Thread.id,
                                     content: v.Message[0].content,
@@ -155,7 +158,8 @@
                                     created: v.Message.created,
                                     dataId: v.Message.id,
                                     content: v.Message.content,
-                                    photo: v.User.photo
+                                    photo: v.User.photo,
+                                    messageOwner: v.Message.user_id
                                 }, 
                                 'append', 
                                 v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right'
@@ -258,7 +262,8 @@
                         created: data.created,
                         dataId: data.dataId,
                         content: $('#MessageContent').val(),
-                        photo: '<?= AuthComponent::user('photo') ?>'
+                        photo: '<?= AuthComponent::user('photo') ?>',
+                        messageOwner: data.messageOwner
                     });
                     $('#MessageContent').val('');
                 } else {
@@ -319,7 +324,9 @@
 
             const messageBlock = `
                 <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
-                    ${displayPhoto(data.photo)}   
+                    <a href="<?= $homeUrl ?>users/profile/${data.messageOwner}" target="_blank">
+                        ${displayPhoto(data.photo)}   
+                    </a>
                     <div class="message-content ${position}-content" data-id="${data.dataId}">
                         <div class="body">
                             ${data.content}                
@@ -343,7 +350,7 @@
             const threadBlock = `
                 <a class="thread-link t-link-${data.dataId}" href="<?= $homeUrl ?>threads/view/${data.dataId}" data-id="${data.dataId}">
                     <div class="message-block">
-                        ${displayPhoto(data.photo)}                      
+                        ${displayPhoto(data.photo)}   
                         <div class="message-content">
                             <div class="header">
                                 ${data.name}
