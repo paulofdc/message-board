@@ -1,9 +1,8 @@
 <?php
-    $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';;
-    $profile_photo = $profile_photo ?? $photo;
-    if($profile_photo) {
+    $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
+    if(isset($profile_photo)) {
         //For profile viewing
-        $photo = $profile_photo;
+        $photo = ($profile_photo == 'none') ? $photo : $profile_photo;
     } else {
         if(AuthComponent::user() && AuthComponent::user('photo') != null) {
             $photo = AuthComponent::user('photo');

@@ -4,7 +4,7 @@
 		<div class="horizontal-alignment">
 			<?= 
                 $this->Element('preview_photo', [
-                    'profile_photo' => $user['photo']
+                    'profile_photo' => $user['photo'] ?? 'none'
                 ]) 
             ?>
             <div>
