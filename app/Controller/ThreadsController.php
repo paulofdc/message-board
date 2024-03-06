@@ -9,7 +9,7 @@ App::uses('AppController', 'Controller');
  */
 class ThreadsController extends AppController {
 
-	public const DEFAULT_PAGE_SIZE = 1;
+	public const DEFAULT_PAGE_SIZE = 5;
 
 	/**
 	 * Components
@@ -250,9 +250,9 @@ class ThreadsController extends AppController {
 	}
 
 	/**
-	 * Load More for both Threads and Messages
+	 * Ajax show more
 	 */
-	public function loadMore() {
+	public function showMore() {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
 		$type = ucfirst($requestData['searchType']) ?? '';
@@ -302,6 +302,12 @@ class ThreadsController extends AppController {
 
 		$data = $this->$type->find('all', $options);
 		foreach($data as $key => $row) {
+			if($type == 'Message') {
+				$data[$key][$type]['isLongText'] = false;
+				if($this->checkTextLength($data[$key][$type]['content'])) {
+					$data[$key][$type]['isLongText'] = true;
+				}
+			}
 			$data[$key][$type][$orderColumn] = $this->dateToString($row[$type][$orderColumn], true);
 		}
 
@@ -313,6 +319,9 @@ class ThreadsController extends AppController {
 		]);
 	}
 
+	/**
+	 * Ajax search
+	 */
 	public function search() {
 		$this->autoRender = false;
 		$requestData = $this->request->data;
@@ -353,10 +362,14 @@ class ThreadsController extends AppController {
 			];
 		}
 
-	
-
 		$data = $this->$type->find('all', $query);
 		foreach($data as $key => $row) {
+			if($type == 'Message') {
+				$data[$key][$type]['isLongText'] = false;
+				if($this->checkTextLength($data[$key][$type]['content'])) {
+					$data[$key][$type]['isLongText'] = true;
+				}
+			}
 			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
 		}
 

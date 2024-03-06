@@ -70,4 +70,15 @@ class AppController extends Controller {
 		$pattern = ($isTimeIncluded) ? 'F j, Y ga' : 'F j, Y';
 		return $date->format($pattern);
 	}
+
+	/**
+	 * Check Text Length.
+	 */
+	public function checkTextLength($content, $limit = 50) {
+		if(strlen(strip_tags($content)) > $limit) {
+			return true;
+		}
+
+		return false;
+	}
 }

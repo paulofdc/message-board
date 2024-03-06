@@ -86,7 +86,8 @@ class MessagesController extends AppController {
 				'isSuccess' => $result,
 				'dataId' => $insertedId,
 				'created' => ($result) ? $this->dateToString($this->Message->field('created', ['id' => $insertedId]), true) : '',
-				'messageOwner' => $this->Auth->user('id')
+				'messageOwner' => $this->Auth->user('id'),
+				'isLongText' => $this->checkTextLength($requestData['content']) ? true : false
 			]);
 
             return;

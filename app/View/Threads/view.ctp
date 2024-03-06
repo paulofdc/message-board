@@ -29,7 +29,7 @@
 
 	<div class="c-container inbox">
         <div class="c-container">
-        <input id="search" type="text" placeholder="Search message..." data-type="message"><br><br>
+            <input id="search" type="text" placeholder="Search message..." data-type="message"><br><br>
         </div>
         <?php $threadController = new ThreadsController(); ?>
         <?php $currentUser = (AuthComponent::user('id')); ?>
@@ -40,6 +40,7 @@
                     $messageOwner = $message['Message']['user_id'] ?? '';
                     $isSender = ($currentUser != $messageOwner);
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
+                    $content = $message['Message']['content'];
                     if($message['User']['photo']) {
                         $photo = $message['User']['photo'];
                     }
@@ -52,8 +53,8 @@
                         ]); ?>
                     </a>
                     <div class="message-content <?= ($isSender) ? 'left-content' : 'right-content'?>" data-id="<?= $dataId ?>">
-                        <div class="body">
-                            <?php echo $message['Message']['content'] ?>
+                        <div class="body <?php echo ($threadController->checkTextLength($content)) ? 'ellipsis' : '' ?>">
+                            <?php echo $content ?>
                         </div>
                         <div class="footer">
                             <?php echo $threadController->dateToString($message['Message']['created'], true); ?>

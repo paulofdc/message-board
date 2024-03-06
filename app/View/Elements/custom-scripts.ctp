@@ -87,7 +87,8 @@
                                                 dataId: v.Message.id,
                                                 content: v.Message.content,
                                                 photo: v.User.photo,
-                                                messageOwner: v.Message.user_id
+                                                messageOwner: v.Message.user_id,
+                                                isLongText: v.Message.isLongText
                                             }, 
                                             'append', 
                                             v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right',
@@ -116,7 +117,7 @@
         $(document).on('click', '#load-more-btn', (e) => {
             e.preventDefault();
             const type = $(e.target).data('type');
-            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'loadMore']); ?>';
+            let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'showMore']); ?>';
             let childElement = (type == 'thread') ? 'a' : '.message-block';
             let offset = $(`.inbox-messages ${childElement}`).length;
             console.log('childElement', childElement);
@@ -133,7 +134,7 @@
             
             ajaxCall(url, 'POST', payload).then(response => {
                 const result = JSON.parse(response);
-                console.log('loadMore', result);
+                console.log('showMore', result);
                 if(result.offset >= $('#count').val()) {
                     $('#load-btn-container').remove();
                 }
@@ -162,7 +163,8 @@
                                     dataId: v.Message.id,
                                     content: v.Message.content,
                                     photo: v.User.photo,
-                                    messageOwner: v.Message.user_id
+                                    messageOwner: v.Message.user_id,
+                                    isLongText: v.Message.isLongText
                                 }, 
                                 'append', 
                                 v.Message.user_id != '<?= $currentLoggedIn ?>' ? 'left' : 'right'
@@ -214,7 +216,13 @@
             if(!dataId) { 
                 dataId = $(e.target).parent().data('id');
             }
-            $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+            if($(e.target).hasClass('ellipsis')){
+                $(e.target).toggleClass('expand');
+            } else {
+                $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+            }
+            
+            console.log('diri??', );
         });
 
         $(document).on('click', '.delete-message-btn', (e) => {
@@ -266,7 +274,8 @@
                         dataId: data.dataId,
                         content: $('#MessageContent').val(),
                         photo: '<?= AuthComponent::user('photo') ?>',
-                        messageOwner: data.messageOwner
+                        messageOwner: data.messageOwner,
+                        isLongText: data.isLongText
                     });
                     $('#MessageContent').val('');
                 } else {
@@ -325,13 +334,18 @@
                 deleteBtn = '';
             }
 
+            isLongText = '';
+            if(data.isLongText){
+                isLongText = ' ellipsis ';
+            }
+
             const messageBlock = `
                 <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
                     <a href="<?= $homeUrl ?>users/profile/${data.messageOwner}" target="_blank">
-                        ${displayPhoto(data.photo)}   
+                        ${displayPhoto(data.photo)}
                     </a>
                     <div class="message-content ${position}-content" data-id="${data.dataId}">
-                        <div class="body">
+                        <div class="body${isLongText}">
                             ${data.content}                
                         </div>
                         <div class="footer">
@@ -358,7 +372,7 @@
                             <div class="header">
                                 ${data.name}
                             </div>
-                            <div class="body">
+                            <div class="body ellipsis">
                                 ${data.content}                       
                             </div>
                             <div class="footer">

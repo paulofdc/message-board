@@ -144,6 +144,7 @@ html {
 .message-block .body {
     margin-bottom: 10px;
     font-size: 12px;
+    word-wrap: break-word;
 }
 
 .message-block .footer {
@@ -180,4 +181,17 @@ html {
 
 .message-content {
     width: 80%;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 100px;
+}
+
+.expand {
+    white-space: normal;
+    overflow: visible;
+    max-height: none;
 }
