@@ -56,18 +56,16 @@ class MessagesController extends AppController {
 			$result = false;
 			$thread = $this->Thread->findById($requestData['thread_id']);
 			if(!$thread) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Thread not found.')
 				]);
-				return;
 			}
 
 			$toCheck = [$thread["Thread"]['owner_id'], $thread["Thread"]['receiver_id']];
 			if(!in_array($this->Auth->user('id'), $toCheck)) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Not allowed.')
 				]);
-				return;
 			}
 
 			$this->Message->create();
@@ -82,15 +80,13 @@ class MessagesController extends AppController {
 			}
 
 			$insertedId = $this->Message->getInsertID();
-            echo json_encode([
+            return json_encode([
 				'isSuccess' => $result,
 				'dataId' => $insertedId,
 				'created' => ($result) ? $this->dateToString($this->Message->field('created', ['id' => $insertedId]), true) : '',
 				'messageOwner' => $this->Auth->user('id'),
 				'isLongText' => $this->checkTextLength($requestData['content']) ? true : false
 			]);
-
-            return;
         }
 
 		if ($this->request->is('post')) {
@@ -153,17 +149,15 @@ class MessagesController extends AppController {
 			$message = $this->Message->findById($id);
 
 			if (!$message) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Message does not exist anymore. Please reload the page.')
 				]);
-				return;
 			}
 
 			if($message['Message']['user_id'] != $this->Auth->user('id')) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Not allowed.')
 				]);
-				return;
 			}
 
 			$this->request->allowMethod('post', 'delete');
@@ -171,10 +165,9 @@ class MessagesController extends AppController {
 				$result = true;
 			}
 
-            echo json_encode([
+            return json_encode([
 				'isSuccess' => $result
 			]);
-			return;
         }
 
 		if (!$this->Message->exists($id)) {

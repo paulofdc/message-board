@@ -212,18 +212,16 @@ class ThreadsController extends AppController {
 			$thread = $this->Thread->findById($id);
 
 			if (!$thread) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Thread does not exist anymore. Please reload the page.')
 				]);
-				return;
 			}
 
 			$toCheck = [$thread['Thread']['owner_id'], $thread['Thread']['receiver_id']];
 			if(!in_array($this->Auth->user('id'), $toCheck)) {
-				echo json_encode([
+				return json_encode([
 					'message' => __('Not allowed.')
 				]);
-				return;
 			}
 
 			$this->request->allowMethod('post', 'delete');
@@ -231,10 +229,9 @@ class ThreadsController extends AppController {
 				$result = true;
 			}
 
-            echo json_encode([
+            return json_encode([
 				'isSuccess' => $result
 			]);
-			return;
         }
 
 		if (!$this->Thread->exists($id)) {
@@ -311,7 +308,7 @@ class ThreadsController extends AppController {
 			$data[$key][$type][$orderColumn] = $this->dateToString($row[$type][$orderColumn], true);
 		}
 
-		echo json_encode([
+		return json_encode([
 			'query' => $options,
 			'offset' => $offset + self::DEFAULT_PAGE_SIZE,
 			'hasLastData' => false,
@@ -373,7 +370,7 @@ class ThreadsController extends AppController {
 			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
 		}
 
-		echo json_encode([
+		return json_encode([
 			'data' => $data
 		]);
 	}
