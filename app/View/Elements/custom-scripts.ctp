@@ -4,8 +4,9 @@
 ?>
 <script>
     $(document).ready(function() {
-        let defaultPhoto = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
-        let timeoutId; 
+        let defaultPhoto = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp',
+            initialOffset = parseInt($('#count').val()),
+            timeoutId; 
 
         $('.select2-recipient').select2({
             width: 'resolve',
@@ -146,7 +147,7 @@
             ajaxCall(url, 'POST', payload).then(response => {
                 const result = JSON.parse(response);
                 console.log('showMore', result);
-                if(result.offset >= $('#count').val()) {
+                if(result.offset >= initialOffset) {
                     $('#load-btn-container').remove();
                 }
                 result.data.map((v) => {
@@ -208,6 +209,7 @@
                 }).then(response => {
                     const data = JSON.parse(response);
                     if(data.isSuccess) {
+                        initialOffset -= 1;
                         $(`.t-link-${dataId}`).fadeOut( () => { $(`.t-link-${dataId}`).remove(); });
                     } else {
                         console.log(response);
@@ -250,6 +252,7 @@
                 }).then(response => {
                     const data = JSON.parse(response);
                     if(data.isSuccess) {
+                        initialOffset -= 1;
                         $(`.m-block-${dataId}`).fadeOut( () => { $(`.m-block-${dataId}`).remove(); });
                     } else {
                         console.log(response);
@@ -283,6 +286,7 @@
             }).then(response => {
                 const data = JSON.parse(response);
                 if(data.isSuccess) {
+                    initialOffset += 1;
                     addMessage({
                         created: data.created,
                         dataId: data.dataId,
