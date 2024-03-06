@@ -65,10 +65,12 @@
                                 switch(type) {
                                     case 'thread':
                                         let name = v.Owner.name,
-                                            photo = v.Owner.photo;
+                                            photo = v.Owner.photo,
+                                            userId = v.Owner.id;
                                         if(v.Owner.id == '<?= $currentLoggedIn ?>') {
                                             name = v.Receiver.name;
                                             photo = v.Receiver.photo;
+                                            userId = v.Receiver.id;
                                         }
                                         addThread({
                                                 messageOwner: v.Message[0].user_id,
@@ -76,7 +78,8 @@
                                                 dataId: v.Thread.id,
                                                 content: v.Message[0].content,
                                                 name: name,
-                                                photo: photo
+                                                photo: photo,
+                                                userId: userId
                                             },
                                             '.inbox-search'
                                         );
@@ -114,6 +117,14 @@
             }, 800);
         });
 
+        $(document).on('click', '.thread-image', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const userId = $(e.target).data('user-id');
+            console.log('test', userId);
+            window.open(`<?= $homeUrl ?>users/profile/${userId}`,'_blank')
+        });
+
         $(document).on('click', '#load-more-btn', (e) => {
             e.preventDefault();
             const type = $(e.target).data('type');
@@ -142,10 +153,12 @@
                     switch(type) {
                         case 'thread':
                             let name = v.Owner.name,
-                                photo = v.Owner.photo;
+                                photo = v.Owner.photo,
+                                userId = v.Owner.id;
                             if(v.Owner.id == '<?= $currentLoggedIn ?>') {
                                 name = v.Receiver.name;
                                 photo = v.Receiver.photo;
+                                userId = v.Receiver.id;
                             }
                             addThread({
                                     messageOwner: v.Message[0].user_id,
@@ -153,7 +166,8 @@
                                     dataId: v.Thread.id,
                                     content: v.Message[0].content,
                                     name: name,
-                                    photo: photo
+                                    photo: photo,
+                                    userId: userId
                                 }
                             );
                             break;
@@ -367,7 +381,7 @@
             const threadBlock = `
                 <a class="thread-link t-link-${data.dataId}" href="<?= $homeUrl ?>threads/view/${data.dataId}" data-id="${data.dataId}">
                     <div class="message-block">
-                        ${displayPhoto(data.photo)}   
+                        ${displayPhoto(data.photo, data.userId, 'thread')}
                         <div class="message-content">
                             <div class="header">
                                 ${data.name}
@@ -388,10 +402,11 @@
             $(locationClass).append(threadBlock);
         }
 
-        const displayPhoto = (image) => {
-            photo = `<img src="${defaultPhoto}" class="avatar" alt="Your Image">`;
+        const displayPhoto = (image, userId = null, type = 'message') => {
+            let isThreadBlock = (type != 'message') ? ' thread-image ' : '',
+                photo = `<img src="${defaultPhoto}" class="avatar${isThreadBlock}" alt="Your Image" data-user-id="${userId}">`;
             if(image) {
-                photo = `<img src="<?= $homeUrl ?>${(image).replace(/^\//, '')}" class="avatar" alt="Your Image">`;
+                photo = `<img src="<?= $homeUrl ?>${(image).replace(/^\//, '')}" class="avatar${isThreadBlock}" alt="Your Image" data-user-id="${userId}">`;
             }
             return photo;
         }

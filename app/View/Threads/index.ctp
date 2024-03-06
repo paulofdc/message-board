@@ -25,6 +25,7 @@
                     $isReceiver = AuthComponent::user('id') == $thread['Thread']['receiver_id'];
                     $name = ($isReceiver) ? $thread['Owner']['name'] : $thread['Receiver']['name'];
                     $image = ($isReceiver) ? $thread['Owner']['photo'] : $thread['Receiver']['photo'];
+                    $userId = ($isReceiver) ? $thread['Owner']['id'] : $thread['Receiver']['id'];
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
                     if($image) {
                         $photo = $image;
@@ -33,8 +34,8 @@
                 <a class="thread-link t-link-<?= $dataId ?>" href="<?php echo $this->Html->url(['action' => 'view', $thread['Thread']['id']]); ?>" data-id="<?= $dataId ?>">
                     <div class="message-block">
                         <?= $this->Html->image($photo, [
-                            'data-id' => $dataId,
-                            'class' => 'avatar',
+                            'data-user-id' => $userId,
+                            'class' => 'avatar thread-image',
                             'alt' => 'Your Image'
                         ]); ?>
                         <div class="message-content">
