@@ -50,6 +50,10 @@ class UsersController extends AppController {
 	 * @return void
 	 */
 	public function add() {
+		if ($this->Auth->user()) {
+			return $this->redirect('/');
+		}
+
 		if ($this->request->is('post')) {
 			$filename = $this->uploadImage();
 			switch($filename) {
@@ -127,6 +131,10 @@ class UsersController extends AppController {
 	 * Login
 	 */
 	public function login() {
+		if ($this->Auth->user()) {
+			return $this->redirect('/');
+		}
+
 		if($this->request->is('post')) {
 			if($this->Auth->login()) {
 				$this->updateUserLoginTime($this->Auth->user('id'));
