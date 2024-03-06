@@ -327,15 +327,17 @@ class ThreadsController extends AppController {
 
 		$currentUserId = $this->Auth->user('id');
 		if($type == 'Message') {
-			$query = [
+			$options = [
 				'order' => $type .'.created DESC',
 				'conditions' => [
 					'thread_id' => $requestData['thread_id'],
 					'Message.content LIKE' => '%' . $searchKeyword . '%'
 				]
 			];
+			$orderColumn = 'created';
 		} else if ($type == 'Thread') {
-			$query = [
+			$this->$type->virtualFields['for_search_name'] = "CASE WHEN Thread.owner_id = {$currentUserId} THEN Receiver.name ELSE Owner.name END";
+			$options = [
 				'contain' => [
 					'Message' => [
 						'order' => 'Message.created DESC',
@@ -346,20 +348,18 @@ class ThreadsController extends AppController {
 				],
 				'conditions' => [
 					'OR' => [
-						'Thread.owner_id' => $currentUserId,
-						'Thread.receiver_id' => $currentUserId
+						"{$type}.owner_id" => $currentUserId,
+						"{$type}.receiver_id" => $currentUserId
 					],
 					'AND' => [
-						'OR' => [
-							'Owner.name LIKE' => '%' . $searchKeyword . '%',
-							'Receiver.name LIKE' => '%' . $searchKeyword . '%'
-						]
+						"{$type}.for_search_name LIKE" => "%{$searchKeyword}%"
 					]
 				]
 			];
+			$orderColumn = 'modified';
 		}
 
-		$data = $this->$type->find('all', $query);
+		$data = $this->$type->find('all', $options);
 		foreach($data as $key => $row) {
 			if($type == 'Message') {
 				$data[$key][$type]['isLongText'] = false;
@@ -367,7 +367,7 @@ class ThreadsController extends AppController {
 					$data[$key][$type]['isLongText'] = true;
 				}
 			}
-			$data[$key][$type]['created'] = $this->dateToString($row[$type]['created'], true);
+			$data[$key][$type][$orderColumn] = $this->dateToString($row[$type][$orderColumn], true);
 		}
 
 		return json_encode([
