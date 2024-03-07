@@ -128,6 +128,7 @@
 
         $(document).on('click', '#load-more-btn', (e) => {
             e.preventDefault();
+            $(e.target).css({'pointer-events': 'none'});
             const type = $(e.target).data('type');
             let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'showMore']); ?>';
             let childElement = (type == 'thread') ? 'a' : '.message-block';
@@ -187,7 +188,9 @@
                             break;
                     }
                 });
+                $(e.target).css({'pointer-events': 'all'});
             }).catch(error => {
+                $(e.target).css({'pointer-events': 'all'});
                 console.error(error);
                 alert('There was a problem during getting the message. Please try again.');
             });
