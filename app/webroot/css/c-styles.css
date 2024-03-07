@@ -195,3 +195,18 @@ html {
     overflow: visible;
     max-height: none;
 }
+
+#birthdate {
+    max-height: 20px;
+    padding: 10px
+}
+
+.ui-datepicker-trigger{
+    bottom: 4px;
+    padding: 10px;
+    height: 44px;
+}
+
+#birthdate .ui-icon {
+    font-size: 20px;
+}

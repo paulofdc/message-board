@@ -28,11 +28,6 @@
 			echo $this->Form->input('id');
 			echo $this->Form->input('name');
 
-			/**
-			 * TO DO
-			 */
-			// echo $this->Form->input('email');
-
 			echo $this->Form->input('birthdate', [
 				'type' => 'text',
 				'autocomplete' => 'off',
