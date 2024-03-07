@@ -222,10 +222,6 @@
             }
         });
 
-        $(document).on('change', '#profile-image-upload', () => {
-            var fileName = $(this).val().split('\\').pop();
-        });
-
         $(document).on('click', '.message-block, .message-content', (e) => {
             e.stopImmediatePropagation();
             let dataId = $(e.target).data('id');
