@@ -18,11 +18,11 @@ class User extends AppModel {
 			),
 			'Minimum Length' => [
 				'rule' => ['minLength', '5'],
-				'message' => 'Please enter at least 5 characters.',
+				'message' => 'Please enter at least 5 characters in name.',
 			],
 			'Maximum Length' => [
 				'rule' => ['maxLength', '20'],
-				'message' => 'Please enter not more than 20 characters.',
+				'message' => 'Please enter not more than 20 characters in name.',
 			]
 		),
 		'email' => array(
@@ -103,11 +103,11 @@ class User extends AppModel {
 			),
 			'Current Email Required' => array(
 				'rule' => array('notBlank'),
-				'message' => 'Current Email is required.',
+				'message' => 'Current email address is required.',
 			),
 			'Current Email Checker' => [
 				'rule' => ['currentEmailChecker'],
-				'message' => 'Your inputted email does not match with the current email.',
+				'message' => 'Your inputted email address does not match with the current email address.',
 			]
 		),
 		'new_email_address' => array(
