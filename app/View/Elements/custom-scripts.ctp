@@ -15,7 +15,6 @@
         });
 
         function formatOption(option) {
-            console.log('option', option);
             if (!option.id) {
                 return option.text;
             }
@@ -52,7 +51,6 @@
             timeoutId = setTimeout(() => {
                 ajaxCall(url, 'POST', payload).then(response => {
                     const result = JSON.parse(response);
-                    console.log(result);
 
                     if($('#search').val()) {
                         $('.inbox-messages').hide();
@@ -122,7 +120,6 @@
             e.preventDefault();
             e.stopImmediatePropagation();
             const userId = $(e.target).data('user-id');
-            console.log('test', userId);
             window.open(`<?= $homeUrl ?>users/profile/${userId}`,'_blank')
         });
 
@@ -133,8 +130,6 @@
             let url = '<?php echo $this->Html->url(['controller' => 'threads', 'action' => 'showMore']); ?>';
             let childElement = (type == 'thread') ? 'a' : '.message-block';
             let offset = $(`.inbox-messages ${childElement}`).length;
-            console.log('childElement', childElement);
-            console.log('offset', offset);
             let payload = {
                 currentLatestOldestId: getLatestOldestId(),
                 searchType: type,
@@ -147,7 +142,6 @@
             
             ajaxCall(url, 'POST', payload).then(response => {
                 const result = JSON.parse(response);
-                console.log('showMore', result);
                 if(result.offset >= initialOffset) {
                     $('#load-btn-container').remove();
                 }
@@ -205,7 +199,6 @@
             e.stopImmediatePropagation();
             if(confirm("<?= __('Are you sure you want to delete this?') ?>")){
                 const dataId = $(e.target).data('id');
-                console.log(dataId);
                 let url = `<?php echo $this->Html->url(array('controller' => 'threads', 'action' => 'delete')); ?>`;
                 ajaxCall(url, 'POST', {
                     id: dataId
@@ -239,7 +232,6 @@
             let messageContent = $(e.target).closest('.message-content');
             if (messageContent.length > 0) {
                 let dataId = messageContent.data('id');
-                console.log('Data ID:', dataId);
                 let body = messageContent.find('.body');
                 if (body.length > 0) {
                     if (body.hasClass('ellipsis')) {
