@@ -186,8 +186,7 @@ html {
 .ellipsis {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: 100px;
+    max-height: 15px;
 }
 
 .expand {
@@ -205,4 +204,10 @@ html {
     bottom: 4px;
     padding: 10px;
     height: 44px;
+}
+
+.show-more {
+    color: #666;
+    font-size: 10px;
+    margin-bottom: 20px;
 }

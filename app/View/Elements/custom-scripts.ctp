@@ -231,13 +231,26 @@
             if(!dataId) { 
                 dataId = $(e.target).parent().data('id');
             }
-            if($(e.target).hasClass('ellipsis')){
-                $(e.target).toggleClass('expand');
-            } else {
-                $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+            $(`.delete-container-${dataId}`).animate({width:'toggle'},350);
+        });
+
+        $(document).on('click', '.show-more', (e) => {
+            e.stopImmediatePropagation();
+            let messageContent = $(e.target).closest('.message-content');
+            if (messageContent.length > 0) {
+                let dataId = messageContent.data('id');
+                console.log('Data ID:', dataId);
+                let body = messageContent.find('.body');
+                if (body.length > 0) {
+                    if (body.hasClass('ellipsis')) {
+                        body.toggleClass('expand');
+                        const showMoreText = $(e.target).text();
+                        $(e.target).text(showMoreText == 'Hide' ? 'Show more' : 'Hide');
+                    } else {
+                        $(`.delete-container-${dataId}`).animate({ width: 'toggle' }, 350);
+                    }
+                } 
             }
-            
-            console.log('diri??', );
         });
 
         $(document).on('click', '.delete-message-btn', (e) => {
@@ -351,11 +364,13 @@
                 deleteBtn = '';
             }
 
-            isLongText = '';
+            let showMore = isLongText = '';
             if(data.isLongText){
                 isLongText = ' ellipsis ';
+                showMore = `<div class="show-more">show more</div>`;
             }
 
+            
             const messageBlock = `
                 <div class="message-block m-block-${data.dataId} conversation c-${position}" data-id="${data.dataId}">
                     <a href="<?= $homeUrl ?>users/profile/${data.messageOwner}" target="_blank">
@@ -363,8 +378,9 @@
                     </a>
                     <div class="message-content ${position}-content" data-id="${data.dataId}">
                         <div class="body${isLongText}">
-                            ${data.content}                
+                            ${nl2br(data.content)}                
                         </div>
+                        ${showMore}
                         <div class="footer">
                             ${data.created}                   
                         </div>
@@ -390,7 +406,7 @@
                                 ${data.name}
                             </div>
                             <div class="body ellipsis">
-                                ${data.content}                       
+                                ${nl2br(data.content)}                       
                             </div>
                             <div class="footer">
                                 ${data.modified}                         
@@ -412,6 +428,14 @@
                 photo = `<img src="<?= $homeUrl ?>${(image).replace(/^\//, '')}" class="avatar${isThreadBlock}" alt="Your Image" data-user-id="${userId}">`;
             }
             return photo;
+        }
+
+        const nl2br = (str, is_xhtml) => {
+            if (typeof str === 'undefined' || str === null) {
+                return '';
+            }
+            var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+            return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
         }
     });
 </script>

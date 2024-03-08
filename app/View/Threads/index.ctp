@@ -42,7 +42,7 @@
                             <div class="header">
                                 <?php echo $name ?>
                             </div>
-                            <div class="body ellipsis" style="pointer-events: none;">
+                            <div class="body ellipsis" style="text-overflow: ellipsis; pointer-events: none;">
                                 <?php echo $thread['Message'][0]['content'] ?? "" ?>
                             </div>
                             <div class="footer">

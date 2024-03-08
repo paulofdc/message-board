@@ -41,6 +41,7 @@
                     $isSender = ($currentUser != $messageOwner);
                     $photo = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?s=200&d=mp';
                     $content = $message['Message']['content'];
+                    $isLengthy = $threadController->checkTextLength($content);
                     if($message['User']['photo']) {
                         $photo = $message['User']['photo'];
                     }
@@ -53,9 +54,13 @@
                         ]); ?>
                     </a>
                     <div class="message-content <?= ($isSender) ? 'left-content' : 'right-content'?>" data-id="<?= $dataId ?>">
-                        <div class="body <?php echo ($threadController->checkTextLength($content)) ? 'ellipsis' : '' ?>">
-                            <?php echo $content ?>
+                        <div class="body <?php echo ($isLengthy) ? 'ellipsis' : '' ?>">
+                            <?php echo nl2br($content) ?>
                         </div>
+                        <?php if($isLengthy) : ?>
+                            <div class="show-more">Show more</div>
+                        <?php endif; ?>
+
                         <div class="footer">
                             <?php echo $threadController->dateToString($message['Message']['created'], true); ?>
                         </div>
