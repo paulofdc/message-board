@@ -15,6 +15,7 @@ class User extends AppModel {
 		'name' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
+				'message' => 'Name is required.'
 			),
 			'Minimum Length' => [
 				'rule' => ['minLength', '5'],
@@ -38,6 +39,7 @@ class User extends AppModel {
 		'password' => array(
 			'Password' => array(
 				'rule' => array('notBlank'),
+				'message' => 'Password is required.'
 			),
 			'Match passwords' => [
 				'rule' => ['matchPasswords'],
@@ -63,6 +65,7 @@ class User extends AppModel {
 		'gender' => array(
 			'notBlank' => array(
 				'rule' => array('notBlank'),
+				'message' => 'Gender is required.',
 			),
 		),
 		'photo' => array(
